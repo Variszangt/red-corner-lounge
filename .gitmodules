@@ -1,0 +1,3 @@
+[submodule "external/vkfw"]
+	path = external/vkfw
+	url = https://github.com/Cvelth/vkfw

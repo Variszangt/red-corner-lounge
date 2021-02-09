@@ -2,6 +2,8 @@
 #include <doctest/doctest.h>
 
 #include "log.h"
+#include <vkfw/vkfw.hpp>
+#include <vulkan/vulkan.hpp>
 
 #if defined(_MSC_VER)
 #include <Windows.h>
@@ -36,7 +38,17 @@ int main(int argc, char** argv)
     int exit_code = 0;
     try
     {
+        vkfw::init();
+        vk::Extent2D resolution;
+        resolution.width = 700;
+        resolution.height = 600;
+
         init_logger();
+        vkfw::Window window = vkfw::createWindow(resolution.width, resolution.height, "Hello, world!");
+        while (!window.shouldClose())
+        {
+            vkfw::pollEvents();
+        };
 
         LOG_INFO("HELLO, WORLD!");
     }

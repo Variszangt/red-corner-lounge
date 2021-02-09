@@ -41,6 +41,8 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES})
 # GLFW
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)
+# VKFW (GLFW binding)
+target_include_directories(${TARGET_NAME} PRIVATE external/vkfw/include)
 
 # GLM
 find_package(glm CONFIG REQUIRED)
