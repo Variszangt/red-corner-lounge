@@ -39,15 +39,21 @@ int main(int argc, char** argv)
     try
     {
         vkfw::init();
+
         vk::Extent2D resolution;
         resolution.width = 700;
         resolution.height = 600;
 
+        vkfw::WindowHints hints;
+        hints.resizable = false;
+
         init_logger();
-        vkfw::Window window = vkfw::createWindow(resolution.width, resolution.height, "Hello, world!");
+        vkfw::Window window = vkfw::createWindow(resolution.width, resolution.height, "Hello, world!", hints);
         while (!window.shouldClose())
         {
             vkfw::pollEvents();
+            if (window.getKey(vkfw::Key::eEscape))
+                window.setShouldClose(true);
         };
 
         LOG_INFO("HELLO, WORLD!");
