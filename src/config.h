@@ -30,7 +30,6 @@ struct Config
 
     int window_width                        = 800;
     int window_height                       = 800;
-    std::string window_title                = "Vulkan!";
 
     VulkanDebug vulkan_debug                = VulkanDebug::Off;
 
@@ -38,6 +37,5 @@ private:
     DEFINE_JSON_SERIALIZABLE(Config,
         window_width,
         window_height,
-        window_title,
         vulkan_debug);
 };

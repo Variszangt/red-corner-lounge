@@ -11,7 +11,9 @@ add_executable(${TARGET_NAME}
     src/config.cpp
     src/utility.h
     src/utility.cpp
-
+    src/app.h
+    src/vulkan_interface.h
+    
     src/error.h
     src/json.h
 )

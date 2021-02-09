@@ -2,8 +2,7 @@
 #include <doctest/doctest.h>
 
 #include "log.h"
-#include <vkfw/vkfw.hpp>
-#include <vulkan/vulkan.hpp>
+#include "app.h"
 
 #if defined(_MSC_VER)
 #include <Windows.h>
@@ -38,25 +37,10 @@ int main(int argc, char** argv)
     int exit_code = 0;
     try
     {
-        vkfw::init();
-
-        vk::Extent2D resolution;
-        resolution.width = 700;
-        resolution.height = 600;
-
-        vkfw::WindowHints hints;
-        hints.resizable = false;
-
         init_logger();
-        vkfw::Window window = vkfw::createWindow(resolution.width, resolution.height, "Hello, world!", hints);
-        while (!window.shouldClose())
-        {
-            vkfw::pollEvents();
-            if (window.getKey(vkfw::Key::eEscape))
-                window.setShouldClose(true);
-        };
 
-        LOG_INFO("HELLO, WORLD!");
+        App app;
+        exit_code = app.run();
     }
     catch (const std::exception& e)
     {
