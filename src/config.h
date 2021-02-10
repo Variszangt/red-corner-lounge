@@ -25,13 +25,12 @@ NLOHMANN_JSON_SERIALIZE_ENUM(VulkanDebug, {
 
 struct Config
 {
-    void load(const std::string& filename);
-    void save(const std::string& filename);
-
     int window_width                        = 800;
     int window_height                       = 800;
-
     VulkanDebug vulkan_debug                = VulkanDebug::Off;
+
+    void load(const std::string& filename);
+    void save(const std::string& filename);
 
 private:
     DEFINE_JSON_SERIALIZABLE(Config,
