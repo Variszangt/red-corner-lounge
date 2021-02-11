@@ -5,7 +5,7 @@
 
 #include "log.h"
 #include "config.h"
-#include "vki/vulkan_interface.h"
+#include "vki/vulkan.h"
 
 /*------------------------------------------------------------------*/
 // Constants:
@@ -27,11 +27,6 @@ const std::string VERSION_STR = fmt::format(
 class App
 {
 public:
-    App()
-    {
-
-    }
-
     int run()
     {
         int exit_code = EXIT_SUCCESS;
@@ -44,13 +39,13 @@ public:
 
             create_window();
 
-            const VulkanInitInfo vulkan_init_info {
-                .config = config,
-                .application_name = TITLE,
-                .application_version = VERSION,
-                .window = window.get()
+            const vki::VulkanInfo vulkan_info {
+                .config                 = config,
+                .application_name       = TITLE,
+                .application_version    = VERSION,
+                .window                 = window.get()
             };
-            vk.init(vulkan_init_info);
+            vk.init(vulkan_info);
         }
         catch (const std::exception& e)
         {
@@ -141,5 +136,5 @@ private:
     Config config;
     vkfw::UniqueInstance glfw_instance;
     vkfw::UniqueWindow window;
-    VulkanInterface vk;
+    vki::Vulkan vk;
 };

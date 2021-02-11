@@ -3,7 +3,9 @@
 #include "error.h"
 #include "vulkan_debug.h"
 
-VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info)
+using namespace vki;
+
+void Instance::init(const InstanceInfo& info)
 {
     /*------------------------------------------------------------------*/
     // ApplicationInfo:
@@ -15,7 +17,7 @@ VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info)
         .engineVersion      = VK_MAKE_VERSION(1, 0, 0),
         .apiVersion         = VK_API_VERSION_1_2,
     };
-    
+
     /*------------------------------------------------------------------*/
     // Layers:
 
@@ -44,7 +46,7 @@ VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info)
                 THROW_ERROR("required layer not available: {}", required_layer_name);
         }
     }
-    
+
     /*------------------------------------------------------------------*/
     // Extensions:
 
@@ -87,7 +89,7 @@ VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info)
     // Debug messenger createinfo:
 
     const auto debug_messenger_createinfo = generate_debug_messenger_createinfo(info.debug);
-    
+
     /*------------------------------------------------------------------*/
     // Extended createinfo (pNext chain):
 
@@ -102,20 +104,11 @@ VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info)
     /*------------------------------------------------------------------*/
     // Create instance:
 
-    auto instance = vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
+    instance = vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
 
     /*------------------------------------------------------------------*/
     // Create debug messenger:
 
-    vk::UniqueDebugUtilsMessengerEXT debug_messenger;
     if (info.debug >= VulkanDebug::On)
         debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debug_messenger_createinfo);
-
-    /*------------------------------------------------------------------*/
-    // Return:
-    
-    return VulkanInstance {
-        .instance               = std::move(instance),
-        .debug_messenger        = std::move(debug_messenger),
-    };
 }

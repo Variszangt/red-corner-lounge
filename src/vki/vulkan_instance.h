@@ -8,23 +8,27 @@
 
 #include "config.h"
 
-/*------------------------------------------------------------------*/
-
-struct VulkanInstance
+namespace vki
 {
-    vk::UniqueInstance instance;
-    vk::UniqueDebugUtilsMessengerEXT debug_messenger;
-    std::vector<vk::ExtensionProperties> available_extensions;
-
-    operator vk::Instance() { return instance.get(); }
-};
-
-struct VulkanInstanceCreateInfo
+struct InstanceInfo
 {
     std::string                 application_name    = nullptr;
     uint32_t                    application_version = 0;
-    VulkanDebug                 debug               = VulkanDebug::Off; // If debug is enabled, instance will be created with validation layers and debug-utils extension/messenger (see also: vulkan_debug.h).
+    VulkanDebug                 debug               = VulkanDebug::Off; // If debug is enabled, instance will be created with validation layers and debug-utils extension (see also: vulkan_debug.h).
     std::span<const char*>      required_extensions;
 };
 
-VulkanInstance create_vulkan_instance(const VulkanInstanceCreateInfo& info);
+class Instance
+{
+public:
+    void init(const InstanceInfo& info);
+
+    vk::Instance operator->() { return instance.get(); }
+    vk::Instance operator*() { return instance.get(); }
+    operator vk::Instance() { return instance.get(); }
+
+private:
+    vk::UniqueInstance instance;
+    vk::UniqueDebugUtilsMessengerEXT debug_messenger;
+};
+}

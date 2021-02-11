@@ -6,11 +6,6 @@
 
 struct VulkanDevice
 {
-    VulkanDevice()
-    {
-
-    }
-    
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice logical_device;
     vk::PhysicalDeviceProperties properties;

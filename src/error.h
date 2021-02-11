@@ -3,8 +3,6 @@
 #include <fmt/format.h>
 #include <exception>
 
-/*------------------------------------------------------------------*/
-
 template<typename T, size_t S>
 inline constexpr size_t get_filename_offset(const T (& str)[S], size_t i = S - 1)
 {

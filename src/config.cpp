@@ -4,8 +4,6 @@
 
 #include "log.h"
 
-/*------------------------------------------------------------------*/
-
 void Config::load(const std::string& filename)
 {
     LOG_INFO("loading configuration from '{}'...", filename);

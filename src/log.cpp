@@ -18,14 +18,12 @@ namespace fs = std::filesystem;
 // Constants:
 
 const std::string LOGS_DIR = "logs";
+const int MAX_LOGS = 10;
 
 /*------------------------------------------------------------------*/
 
 void remove_old_logs()
 {
-    static constexpr int logs_to_keep = 10;
-
-
     if (fs::exists(LOGS_DIR) && fs::is_directory(LOGS_DIR))
     {
         using file_time_t = std::chrono::system_clock::rep;
@@ -44,7 +42,7 @@ void remove_old_logs()
         }
 
         const int log_count = static_cast<int>(time_sorted_logs.size());
-        const int logs_to_remove =  log_count - logs_to_keep;
+        const int logs_to_remove =  log_count - MAX_LOGS;
         auto it = time_sorted_logs.begin();
         for (int i = 0; i < logs_to_remove; ++i)
         {
@@ -61,11 +59,9 @@ void remove_old_logs()
     }
 }
 
-/*------------------------------------------------------------------*/
-// Custom formatter:
-
 namespace spdlog
 {
+// Custom formatter for logging:
 // This formatter is a modified version of:
 // \spdlog\pattern_formatter-inl.h -> class full_formatter;
 // Pattern: [time] [type] [optional_trace] message
@@ -164,8 +160,6 @@ private:
     memory_buf_t cached_datetime_;
 };
 }
-
-/*------------------------------------------------------------------*/
 
 // Returns a sink to a file. File will be placed in LOGS_DIR and named using system time.
 // Returns an empty pointer if no sink could be opened.

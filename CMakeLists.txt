@@ -18,7 +18,8 @@ add_executable(${TARGET_NAME}
     src/vki/vulkan_instance.h
     src/vki/vulkan_instance.cpp
     src/vki/vulkan_device.h
-    src/vki/vulkan_interface.h
+    src/vki/vulkan.h
+    src/vki/vulkan.cpp
     
     src/error.h
     src/json.h
@@ -46,6 +47,7 @@ find_package(Vulkan REQUIRED)
 target_include_directories(${TARGET_NAME} PRIVATE ${Vulkan_INCLUDE_DIR})
 target_link_libraries(${TARGET_NAME} PRIVATE ${Vulkan_LIBRARIES})
 add_compile_definitions(VULKAN_HPP_NO_STRUCT_CONSTRUCTORS)
+add_compile_definitions(VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1)
 
 # GLFW
 find_package(glfw3 CONFIG REQUIRED)
