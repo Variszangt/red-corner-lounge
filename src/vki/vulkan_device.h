@@ -4,10 +4,37 @@
 
 #include "error.h"
 
-struct VulkanDevice
+// TODO: DEVICEEES!
+namespace vki
 {
+/*------------------------------------------------------------------*/
+// DeviceInitInfo:
+
+struct DeviceInitInfo
+{
+    vk::Instance instance;
+    vk::SurfaceKHR surface;
+    std::vector<std::string> required_extensions;
+};
+
+/*------------------------------------------------------------------*/
+// Device:
+
+class Device
+{
+public:
+    void init(const DeviceInitInfo& info);
+
+    auto operator->() { return logical_device.get(); }
+    operator auto() { return logical_device.get(); }
+
+private:
+    void pick_physical_device();
+
+private:
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice logical_device;
+
     vk::PhysicalDeviceProperties properties;
     vk::PhysicalDeviceMemoryProperties memory_properties;
     std::vector<vk::QueueFamilyProperties> queue_family_properties;
@@ -23,23 +50,6 @@ struct VulkanDevice
 
     vk::UniqueCommandPool graphics_command_pool;
     vk::UniqueCommandPool transfer_command_pool;
-
-
-    operator vk::Device() { return logical_device.get(); };
-
-    explicit VulkanDevice(vk::PhysicalDevice physical_device)
-    {
-        assert(physical_device);
-
-        this->physical_device = physical_device;
-
-        properties = physical_device.getProperties();
-        memory_properties = physical_device.getMemoryProperties();
-        queue_family_properties = physical_device.getQueueFamilyProperties();
-
-
-
-    }
 
     uint32_t get_queue_family_index(const vk::QueueFlags required_flags) const
     {
@@ -80,3 +90,4 @@ struct VulkanDevice
         THROW_ERROR("required queue family could not be found: {}", static_cast<uint32_t>(required_flags));
     }
 };
+}

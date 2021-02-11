@@ -2,6 +2,8 @@
 
 #include "log.h"
 
+namespace vki
+{
 // Callback function for Vulkan debug messenger. Logs the Vulkan message as a trace/warning/error according to its severity.
 VKAPI_ATTR VkBool32 VKAPI_CALL log_vulkan_validation_message(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -33,7 +35,7 @@ vk::DebugUtilsMessengerCreateInfoEXT generate_debug_messenger_createinfo(const V
 {
     using SeverityFlags  = vk::DebugUtilsMessageSeverityFlagBitsEXT;
     using TypeFlags      = vk::DebugUtilsMessageTypeFlagBitsEXT;
-    
+
     if (level == VulkanDebug::Off)
         return {};
 
@@ -49,4 +51,5 @@ vk::DebugUtilsMessengerCreateInfoEXT generate_debug_messenger_createinfo(const V
         .messageType      = type,
         .pfnUserCallback  = log_vulkan_validation_message,
     };
+}
 }

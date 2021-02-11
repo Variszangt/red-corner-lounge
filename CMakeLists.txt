@@ -12,14 +12,16 @@ add_executable(${TARGET_NAME}
     src/utility.h
     src/utility.cpp
     src/app.h
+    src/app.cpp
     
     src/vki/vulkan_debug.h
     src/vki/vulkan_debug.cpp
     src/vki/vulkan_instance.h
     src/vki/vulkan_instance.cpp
     src/vki/vulkan_device.h
-    src/vki/vulkan.h
-    src/vki/vulkan.cpp
+    src/vki/vulkan_device.cpp
+    src/vki/vulkan_interface.h
+    src/vki/vulkan_interface.cpp
     
     src/error.h
     src/json.h

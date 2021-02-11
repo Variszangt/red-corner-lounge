@@ -7,8 +7,7 @@
 /*------------------------------------------------------------------*/
 // Thread-safe localtime:
 
-[[nodiscard]]
-inline std::tm localtime_xp(std::time_t time)
+[[nodiscard]] inline std::tm localtime_xp(std::time_t time)
 {
     std::tm local_time {};
 #if defined(__unix__)
@@ -26,22 +25,13 @@ inline std::tm localtime_xp(std::time_t time)
 /*------------------------------------------------------------------*/
 // container helper functions:
 
-template<typename AC, typename Key>
-concept AssociativeContainer = requires(AC container, Key key)
-{
-    { container.find(key) }->std::same_as<typename AC::const_iterator>;
-    { container.cbegin() }->std::same_as<typename AC::const_iterator>;
-    { container.cend() }->std::same_as<typename AC::const_iterator>;
-}&& std::three_way_comparable<Key>;
-
-template<typename Key, AssociativeContainer<Key> AC>
-[[nodiscard]] inline bool contains(const AC& container, const Key& key)
+template<typename Key, typename AssociativeContainer>
+[[nodiscard]] inline bool contains(const AssociativeContainer& container, const Key& key)
 {
     return container.find(key) != container.cend();
 };
 
 template<typename T>
-requires std::equality_comparable<T>
 [[nodiscard]] inline bool contains(const std::vector<T>& vector, const T& t)
 {
     return std::find(vector.cbegin(), vector.cend(), t) != vector.cend();

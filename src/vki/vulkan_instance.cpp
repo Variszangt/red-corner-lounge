@@ -1,11 +1,19 @@
 #include "vulkan_instance.h"
 
+#include "utility.h"
 #include "error.h"
 #include "vulkan_debug.h"
 
-using namespace vki;
+namespace vki
+{
+/*------------------------------------------------------------------*/
+// Constants:
 
-void Instance::init(const InstanceInfo& info)
+const char* DEBUG_UTILS_EXTENSION_NAME = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+
+/*------------------------------------------------------------------*/
+
+vk::UniqueInstance create_instance(const InstanceInitInfo& info)
 {
     /*------------------------------------------------------------------*/
     // ApplicationInfo:
@@ -52,8 +60,13 @@ void Instance::init(const InstanceInfo& info)
 
     const auto available_extensions = vk::enumerateInstanceExtensionProperties();
 
-    const auto required_extensions_data = info.required_extensions.data();
-    const uint32_t required_extension_count = static_cast<uint32_t>(info.required_extensions.size());
+    auto required_extensions = info.required_extensions;
+    if (info.debug >= VulkanDebug::On &&
+        !contains(required_extensions, DEBUG_UTILS_EXTENSION_NAME))
+        required_extensions.emplace_back(DEBUG_UTILS_EXTENSION_NAME);
+
+    const auto required_extensions_data = required_extensions.data();
+    const uint32_t required_extension_count = static_cast<uint32_t>(required_extensions.size());
 
     // Verify availability of required extensions:
     if (required_extension_count)
@@ -104,11 +117,6 @@ void Instance::init(const InstanceInfo& info)
     /*------------------------------------------------------------------*/
     // Create instance:
 
-    instance = vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
-
-    /*------------------------------------------------------------------*/
-    // Create debug messenger:
-
-    if (info.debug >= VulkanDebug::On)
-        debug_messenger = instance->createDebugUtilsMessengerEXTUnique(debug_messenger_createinfo);
+    return vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
+}
 }
