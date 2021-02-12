@@ -10,7 +10,7 @@
 #include "vki/vulkan_device.h"
 
 /*------------------------------------------------------------------*/
-// All Vulkan-related code shall be written in the vki ("vulkan interface") subfolder/namespace. This header, in turn, serves as the primary interface to any such code - it is the only Vulkan header that application code should ever include.
+// All Vulkan-related code shall be written in the vki ("vulkan interface") subfolder/namespace. This header, in turn, serves as the interface to any such code - it is the only Vulkan header that application code should ever include.
 
 /*------------------------------------------------------------------*/
 // VulkanInitInfo:
@@ -29,7 +29,7 @@ struct VulkanInitInfo
 class Vulkan
 {
 public:
-    void init(const VulkanInitInfo& info);
+    void init(const VulkanInitInfo& init_info);
 
 private:
     vk::UniqueInstance instance;
@@ -38,4 +38,5 @@ private:
 
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice device;
+    vki::DeviceInfo device_info;
 };

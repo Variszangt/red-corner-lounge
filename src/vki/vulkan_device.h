@@ -2,92 +2,32 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "error.h"
+#include "config.h"
 
-// TODO: DEVICEEES!
 namespace vki
 {
-/*------------------------------------------------------------------*/
-// DeviceInitInfo:
-
-struct DeviceInitInfo
+struct DeviceInfo
 {
-    vk::Instance instance;
-    vk::SurfaceKHR surface;
-    std::vector<std::string> required_extensions;
-};
-
-/*------------------------------------------------------------------*/
-// Device:
-
-class Device
-{
-public:
-    void init(const DeviceInitInfo& info);
-
-    auto operator->() { return logical_device.get(); }
-    operator auto() { return logical_device.get(); }
-
-private:
-    void pick_physical_device();
-
-private:
-    vk::PhysicalDevice physical_device;
-    vk::UniqueDevice logical_device;
-
+    vk::PhysicalDeviceFeatures enabled_features;
     vk::PhysicalDeviceProperties properties;
     vk::PhysicalDeviceMemoryProperties memory_properties;
-    std::vector<vk::QueueFamilyProperties> queue_family_properties;
+    
     struct
     {
-        uint32_t graphics;
-        uint32_t transfer;
+        uint32_t graphics   = 0u;
+        uint32_t transfer   = 0u;
+        uint32_t compute    = 0u;
     } queue_family_indices;
-
-    vk::PhysicalDeviceFeatures features;
-    vk::PhysicalDeviceFeatures enabled_features;
-    std::vector<std::string> supported_extension_names;
-
-    vk::UniqueCommandPool graphics_command_pool;
-    vk::UniqueCommandPool transfer_command_pool;
-
-    uint32_t get_queue_family_index(const vk::QueueFlags required_flags) const
-    {
-        const uint32_t queue_count = static_cast<uint32_t>(queue_family_properties.size());
-
-        // Find dedicated compute queue:
-        if (required_flags & vk::QueueFlagBits::eCompute)
-        {
-            for (uint32_t i = 0; i < queue_count; ++i)
-            {
-                const auto flags = queue_family_properties[i].queueFlags;
-                if ((flags & required_flags) && (!(flags & vk::QueueFlagBits::eGraphics)))
-                    return i;
-            }
-        }
-
-        // Find dedicated transfer queue:
-        if (required_flags & vk::QueueFlagBits::eTransfer)
-        {
-            for (uint32_t i = 0; i < queue_count; ++i)
-            {
-                const auto flags = queue_family_properties[i].queueFlags;
-                if ((flags & required_flags) &&
-                    !(flags & vk::QueueFlagBits::eGraphics) &&
-                    !(flags & vk::QueueFlagBits::eCompute))
-                    return i;
-            }
-        }
-
-        // Otherwise, return any queue with all required flags:
-        for (uint32_t i = 0; i < queue_count; ++i)
-        {
-            const auto flags = queue_family_properties[i].queueFlags;
-            if (flags & required_flags)
-                return i;
-        }
-
-        THROW_ERROR("required queue family could not be found: {}", static_cast<uint32_t>(required_flags));
-    }
 };
+
+struct DeviceCreateInfo
+{
+    vk::Instance                instance;
+    vk::SurfaceKHR              surface;
+    std::vector<const char*>    required_extensions;
+    vk::PhysicalDeviceFeatures  required_features; // Verifying each feature's availability is hardcoded into the pick_physical_device() function - when adding a new feature, make sure to modify it accordingly!
+    VulkanDebug                 debug; // If debug is enabled, additional messages will be logged during the device selection process.
+};
+
+std::tuple<vk::PhysicalDevice, vk::UniqueDevice, DeviceInfo> create_device(const DeviceCreateInfo& createinfo);
 }

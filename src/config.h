@@ -9,7 +9,7 @@
 
 enum class VulkanDebug
 {
-    Off,        // Disable Vulkan debug messages.
+    Off = 0,    // Disable Vulkan debug messages.
     On,         // Enable Vulkan Warning and Error messages.
     Verbose,    // Enable Vulkan Warning and Error messages + Info and Verbose messages.
 };

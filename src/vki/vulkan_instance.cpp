@@ -13,14 +13,14 @@ const char* DEBUG_UTILS_EXTENSION_NAME = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
 /*------------------------------------------------------------------*/
 
-vk::UniqueInstance create_instance(const InstanceInitInfo& info)
+vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
 {
     /*------------------------------------------------------------------*/
     // ApplicationInfo:
 
     const vk::ApplicationInfo application_info {
-        .pApplicationName   = info.application_name.c_str(),
-        .applicationVersion = info.application_version,
+        .pApplicationName   = createinfo.application_name.c_str(),
+        .applicationVersion = createinfo.application_version,
         .pEngineName        = "myEngine",
         .engineVersion      = VK_MAKE_VERSION(1, 0, 0),
         .apiVersion         = VK_API_VERSION_1_2,
@@ -32,7 +32,7 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
     const auto available_layers = vk::enumerateInstanceLayerProperties();
 
     std::vector<const char*> required_layers;
-    if (info.debug >= VulkanDebug::On)
+    if (createinfo.debug >= VulkanDebug::On)
         required_layers.emplace_back("VK_LAYER_KHRONOS_validation");
     const uint32_t required_layer_count = static_cast<uint32_t>(required_layers.size());
 
@@ -41,16 +41,16 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
     {
         for (const auto& required_layer_name : required_layers)
         {
-            bool found = false;
+            bool layer_found = false;
             for (const auto& available_layer : available_layers)
             {
                 if (std::strcmp(available_layer.layerName, required_layer_name) == 0)
                 {
-                    found = true;
+                    layer_found = true;
                     break;
                 }
             }
-            if (!found)
+            if (!layer_found)
                 THROW_ERROR("required layer not available: {}", required_layer_name);
         }
     }
@@ -60,8 +60,8 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
 
     const auto available_extensions = vk::enumerateInstanceExtensionProperties();
 
-    auto required_extensions = info.required_extensions;
-    if (info.debug >= VulkanDebug::On &&
+    auto required_extensions = createinfo.required_extensions;
+    if (createinfo.debug >= VulkanDebug::On &&
         !contains(required_extensions, DEBUG_UTILS_EXTENSION_NAME))
         required_extensions.emplace_back(DEBUG_UTILS_EXTENSION_NAME);
 
@@ -71,18 +71,18 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
     // Verify availability of required extensions:
     if (required_extension_count)
     {
-        for (const auto& required_extension_name : info.required_extensions)
+        for (const auto& required_extension_name : createinfo.required_extensions)
         {
-            bool found = false;
+            bool extension_found = false;
             for (const auto& available_extension : available_extensions)
             {
                 if (std::strcmp(available_extension.extensionName, required_extension_name) == 0)
                 {
-                    found = true;
+                    extension_found = true;
                     break;
                 }
             }
-            if (!found)
+            if (!extension_found)
                 THROW_ERROR("required extension not available: {}", required_extension_name);
         }
     }
@@ -101,7 +101,7 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
     /*------------------------------------------------------------------*/
     // Debug messenger createinfo:
 
-    const auto debug_messenger_createinfo = generate_debug_messenger_createinfo(info.debug);
+    const auto debug_messenger_createinfo = generate_debug_messenger_createinfo(createinfo.debug);
 
     /*------------------------------------------------------------------*/
     // Extended createinfo (pNext chain):
@@ -111,7 +111,7 @@ vk::UniqueInstance create_instance(const InstanceInitInfo& info)
         debug_messenger_createinfo,
     };
 
-    if (info.debug == VulkanDebug::Off)
+    if (createinfo.debug == VulkanDebug::Off)
         extended_createinfo.unlink<vk::DebugUtilsMessengerCreateInfoEXT>();
 
     /*------------------------------------------------------------------*/
