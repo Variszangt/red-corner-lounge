@@ -91,28 +91,24 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     /*------------------------------------------------------------------*/
     // Command pools:
 
-    { // Graphics
-        const vk::CommandPoolCreateInfo command_pool_createinfo {
+    // Graphics
+    command_pools.graphics = device->createCommandPoolUnique(
+        vk::CommandPoolCreateInfo {
             .queueFamilyIndex = device_info.queue_family_indices.graphics
-        };
-        command_pools.graphics = device->createCommandPoolUnique(command_pool_createinfo);
-    }
-    
-    { // Transfer
-        const vk::CommandPoolCreateInfo command_pool_createinfo {
+        }
+    );
+
+    // Transfer
+    command_pools.transfer = device->createCommandPoolUnique(
+        vk::CommandPoolCreateInfo {
             .queueFamilyIndex = device_info.queue_family_indices.transfer
-        };
-        command_pools.transfer = device->createCommandPoolUnique(command_pool_createinfo);
-    }
-    
-    { // Compute
-        const vk::CommandPoolCreateInfo command_pool_createinfo {
-            .queueFamilyIndex = device_info.queue_family_indices.compute
-        };
-        command_pools.compute = device->createCommandPoolUnique(command_pool_createinfo);
-    }
-    
-    /*------------------------------------------------------------------*/
-    // 
-    
+        }
+    );
+
+    // Compute
+    command_pools.compute = device->createCommandPoolUnique(
+    vk::CommandPoolCreateInfo {
+        .queueFamilyIndex = device_info.queue_family_indices.compute
+        }
+    );
 }
