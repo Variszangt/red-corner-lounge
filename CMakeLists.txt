@@ -13,7 +13,9 @@ add_executable(${TARGET_NAME}
     src/utility.cpp
     src/app.h
     src/app.cpp
-    
+  
+    src/vki/vulkan_assist.h
+    src/vki/vulkan_assist.cpp
     src/vki/vulkan_debug.h
     src/vki/vulkan_debug.cpp
     src/vki/vulkan_instance.h

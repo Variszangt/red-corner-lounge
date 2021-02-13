@@ -18,6 +18,9 @@ struct DeviceInfo
         uint32_t transfer   = 0u;
         uint32_t compute    = 0u;
     } queue_family_indices;
+    
+    // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (each i-th bit of the filter specifies a memory type index).
+    uint32_t get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties);
 };
 
 struct DeviceCreateInfo

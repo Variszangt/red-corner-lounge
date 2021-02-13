@@ -39,4 +39,18 @@ private:
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice device;
     vki::DeviceInfo device_info;
+
+    struct
+    {
+        vk::Queue graphics;
+        vk::Queue transfer;
+        vk::Queue compute;
+    } queues;
+
+    struct
+    {
+        vk::UniqueCommandPool graphics;
+        vk::UniqueCommandPool transfer;
+        vk::UniqueCommandPool compute;
+    } command_pools;
 };

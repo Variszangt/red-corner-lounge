@@ -6,6 +6,18 @@
 
 namespace vki
 {
+uint32_t DeviceInfo::get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties)
+{
+    for (uint32_t i = 0; i != memory_properties.memoryTypeCount; ++i)
+    {
+        if (index_filter & (1 << i) &&
+            (memory_properties.memoryTypes[i].propertyFlags & required_properties) == required_properties)
+            return i;
+    }
+
+    THROW_ERROR("suitable memory type could not be found");
+}
+
 uint32_t get_queue_family_index(const vk::PhysicalDevice device, vk::QueueFlags required_flags)
 {
     const auto queue_family_properties = device.getQueueFamilyProperties();
