@@ -63,7 +63,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     surface = vkfw::createWindowSurfaceUnique(instance.get(), init_info.window);
 
     /*------------------------------------------------------------------*/
-    // Create (physical/logical) device:
+    // Create device:
 
     const std::vector<const char*>required_device_extensions {
 
@@ -81,34 +81,5 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         .required_features   = required_device_features,
         .debug               = init_info.config.vulkan_debug,
     };
-    std::tie(physical_device, device, device_info) = vki::create_device(device_createinfo);
-
-    // Get queue handles:
-    queues.graphics = device->getQueue(device_info.queue_family_indices.graphics, 0);
-    queues.transfer = device->getQueue(device_info.queue_family_indices.transfer, 0);
-    queues.compute  = device->getQueue(device_info.queue_family_indices.compute, 0);
-
-    /*------------------------------------------------------------------*/
-    // Command pools:
-
-    // Graphics
-    command_pools.graphics = device->createCommandPoolUnique(
-        vk::CommandPoolCreateInfo {
-            .queueFamilyIndex = device_info.queue_family_indices.graphics
-        }
-    );
-
-    // Transfer
-    command_pools.transfer = device->createCommandPoolUnique(
-        vk::CommandPoolCreateInfo {
-            .queueFamilyIndex = device_info.queue_family_indices.transfer
-        }
-    );
-
-    // Compute
-    command_pools.compute = device->createCommandPoolUnique(
-    vk::CommandPoolCreateInfo {
-        .queueFamilyIndex = device_info.queue_family_indices.compute
-        }
-    );
+    device_wrapper = vki::create_device(device_createinfo);
 }

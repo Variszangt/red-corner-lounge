@@ -6,7 +6,7 @@
 
 namespace vki
 {
-uint32_t DeviceInfo::get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties)
+uint32_t DeviceWrapper::get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties) const
 {
     for (uint32_t i = 0; i != memory_properties.memoryTypeCount; ++i)
     {
@@ -127,7 +127,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
             if (createinfo.debug >= VulkanDebug::On)
                 LOG_WARNING("gpu does not support anisotropic sampling");
         }
-        
+
         if (createinfo.required_features.sampleRateShading && !device_features.sampleRateShading)
         {
             supports_minimal_requirements = false;
@@ -150,35 +150,38 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     return optimal_device;
 }
 
-std::tuple<vk::PhysicalDevice, vk::UniqueDevice, DeviceInfo> create_device(const DeviceCreateInfo& createinfo)
+DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
 {
-    DeviceInfo device_info;
-
     /*------------------------------------------------------------------*/
     // Pick physical device:
 
-    vk::PhysicalDevice physical_device = pick_physical_device(createinfo);
+    auto physical_device = pick_physical_device(createinfo);
 
-    device_info.enabled_features  = createinfo.required_features;
-    device_info.properties        = physical_device.getProperties();
-    device_info.memory_properties = physical_device.getMemoryProperties();
-    
+    auto enabled_features  = createinfo.required_features;
+    auto properties        = physical_device.getProperties();
+    auto memory_properties = physical_device.getMemoryProperties();
+
     /*------------------------------------------------------------------*/
-    // Prepare queues:
+    // Get queue indices:
 
-    device_info.queue_family_indices.graphics = get_queue_family_index(physical_device, vk::QueueFlagBits::eGraphics);
-    device_info.queue_family_indices.transfer = get_queue_family_index(physical_device, vk::QueueFlagBits::eTransfer);
-    device_info.queue_family_indices.compute  = get_queue_family_index(physical_device, vk::QueueFlagBits::eCompute);
+    DeviceWrapper::QueueFamilyIndices queue_family_indices {
+        .graphics = get_queue_family_index(physical_device, vk::QueueFlagBits::eGraphics),
+        .transfer = get_queue_family_index(physical_device, vk::QueueFlagBits::eTransfer),
+        .compute  = get_queue_family_index(physical_device, vk::QueueFlagBits::eCompute),
+    };
 
-    const std::set<uint32_t> unique_queue_family_indices = { // Filter unique indices, as some may overlap.
-        device_info.queue_family_indices.graphics,
-        device_info.queue_family_indices.transfer,
-        device_info.queue_family_indices.compute,
+    /*------------------------------------------------------------------*/
+    // Prepare queue createinfos:
+    
+    const std::set<uint32_t> unique_indices = { // Filter only unique indices, as some may overlap.
+        queue_family_indices.graphics,
+        queue_family_indices.transfer,
+        queue_family_indices.compute,
     };
 
     std::vector<vk::DeviceQueueCreateInfo> queue_createinfos;
     const float queue_family_priority = 1.f;
-    for (const auto& index : unique_queue_family_indices)
+    for (const auto& index : unique_indices)
     {
         queue_createinfos.emplace_back(vk::DeviceQueueCreateInfo {
             .queueFamilyIndex   = index,
@@ -188,20 +191,52 @@ std::tuple<vk::PhysicalDevice, vk::UniqueDevice, DeviceInfo> create_device(const
     }
 
     /*------------------------------------------------------------------*/
-    // Create logical device:
+    // Create device:
 
-    const vk::DeviceCreateInfo logical_device_createinfo {
+    const vk::DeviceCreateInfo device_createinfo {
         .queueCreateInfoCount       = static_cast<uint32_t>(queue_createinfos.size()),
         .pQueueCreateInfos          = queue_createinfos.data(),
         .enabledExtensionCount      = static_cast<uint32_t>(createinfo.required_extensions.size()),
         .ppEnabledExtensionNames    = createinfo.required_extensions.data(),
         .pEnabledFeatures           = &createinfo.required_features,
     };
-    vk::UniqueDevice logical_device = physical_device.createDeviceUnique(logical_device_createinfo);
+    auto device = physical_device.createDeviceUnique(device_createinfo);
+
+    /*------------------------------------------------------------------*/
+    // Get queue handles:
+
+    DeviceWrapper::Queues queues {
+        .graphics = device->getQueue(queue_family_indices.graphics, 0),
+        .transfer = device->getQueue(queue_family_indices.transfer, 0),
+        .compute  = device->getQueue(queue_family_indices.compute, 0),
+    };
+
+    /*------------------------------------------------------------------*/
+    // Create command pools:
+
+    auto create_command_pool = [&](const uint32_t index)
+    {
+        return device->createCommandPoolUnique(vk::CommandPoolCreateInfo { .queueFamilyIndex = index });
+    };
+    
+    DeviceWrapper::CommandPools command_pools {
+        .graphics = create_command_pool(queue_family_indices.graphics),
+        .transfer = create_command_pool(queue_family_indices.graphics),
+        .compute  = create_command_pool(queue_family_indices.graphics),
+    };
 
     /*------------------------------------------------------------------*/
     // Return:
-    
-    return { std::move(physical_device), std::move(logical_device), std::move(device_info) };
+
+    return DeviceWrapper {
+        .physical_device        = std::move(physical_device),
+        .device                 = std::move(device),
+        .enabled_features       = std::move(enabled_features),
+        .properties             = std::move(properties),
+        .memory_properties      = std::move(memory_properties),
+        .queue_family_indices   = std::move(queue_family_indices),
+        .queues                 = std::move(queues),
+        .command_pools          = std::move(command_pools),
+    };
 };
 }

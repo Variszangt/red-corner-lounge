@@ -2,6 +2,13 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <vki/vulkan_device.h>
+
+/*------------------------------------------------------------------*/
+// The functions in this unit are simple at the cost of performance. Use of these functions should be limited to prototyping only.
+
+namespace vki
+{
 /*------------------------------------------------------------------*/
 // Sync:
 
@@ -11,80 +18,72 @@ vk::UniqueFence create_fence(const vk::Device device);
 /*------------------------------------------------------------------*/
 // SingleTimeCommandBuffer:
 
-// Use to record and submit single time commands. Simple and slow. Use only for non-performant code.
+// Use to record and submit single time commands.
 class SingleTimeCommandBuffer
 {
 public:
-    SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue);
-
-    vk::CommandBuffer begin();
+    SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue); // Allocates a new command buffer on the specified command pool and begins recording. Queued (->) commands will be submitted to the specified queue upon calling submit().
     void submit();
+
+    vk::CommandBuffer* operator->() { return &command_buffer.get(); }
 
 private:
     vk::Device device;
     vk::CommandPool command_pool;
     vk::Queue queue;
-    
+
     vk::UniqueCommandBuffer command_buffer;
 };
 
 /*------------------------------------------------------------------*/
+// Buffers:
 
-// std::pair<VkBuffer, VkDeviceMemory> VulkanApp::create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-// {
-//     assert(device);
+std::pair<vk::UniqueBuffer, vk::UniqueDeviceMemory> create_buffer(
+    const DeviceWrapper& device_wrapper,
+    const vk::DeviceSize size,
+    const vk::BufferUsageFlags usage,
+    const vk::MemoryPropertyFlags properties)
+{
+    const auto device = device_wrapper.device.get();
+    assert(device);
 
-//     VkBuffer buffer              = VK_NULL_HANDLE;
-//     VkDeviceMemory buffer_memory = VK_NULL_HANDLE;
+    // Create buffer:
+    const vk::BufferCreateInfo buffer_createinfo {
+        .size           = size,
+        .usage          = usage,
+        .sharingMode    = vk::SharingMode::eExclusive,
+    };
+    auto buffer = device.createBufferUnique(buffer_createinfo);
 
-//     /*------------------------------------------------------------------*/
-//     // Create buffer:
+    // Allocate required buffer memory:
+    const auto memory_requirements = device.getBufferMemoryRequirements(buffer.get());
+    const vk::MemoryAllocateInfo allocate_info {
+        .allocationSize     = memory_requirements.size,
+        .memoryTypeIndex    = device_wrapper.get_memory_type_index(memory_requirements.memoryTypeBits, properties),
+    };
+    auto buffer_memory = device.allocateMemoryUnique(allocate_info);
 
-//     const VkBufferCreateInfo buffer_createinfo {
-//         .sType          = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-//         .size           = size,
-//         .usage          = usage,
-//         .sharingMode    = VK_SHARING_MODE_EXCLUSIVE
-//     };
+    // Bind and return:
+    device.bindBufferMemory(buffer.get(), buffer_memory.get(), 0);
+    return std::make_pair(std::move(buffer), std::move(buffer_memory));
+}
 
-//     VkResult result = vkCreateBuffer(device, &buffer_createinfo, nullptr, &buffer);
-//     if (result != VK_SUCCESS)
-//         THROW_ERROR("buffer could not be created; VkResult: {}", result);
+void copy_buffer(
+    const DeviceWrapper& device_wrapper,
+    const vk::Buffer src,
+    const vk::Buffer dst,
+    const vk::DeviceSize size)
+{
+    auto device         = device_wrapper.device.get();
+    auto command_pool   = device_wrapper.command_pools.transfer.get();
+    auto transfer_queue = device_wrapper.queues.transfer;
 
-//     /*------------------------------------------------------------------*/
-//     // Allocate required buffer memory:
+    assert(device);
+    assert(command_pool);
+    assert(transfer_queue);
 
-//     VkMemoryRequirements memory_requirements;
-//     vkGetBufferMemoryRequirements(device, buffer, &memory_requirements);
-
-//     const VkMemoryAllocateInfo allocate_info {
-//         .sType              = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-//         .allocationSize     = memory_requirements.size,
-//         .memoryTypeIndex    = get_memory_type_index(memory_requirements.memoryTypeBits, properties)
-//     };
-
-//     result = vkAllocateMemory(device, &allocate_info, nullptr, &buffer_memory);
-//     if (result != VK_SUCCESS)
-//         THROW_ERROR("buffer memory could not be allocated; VkResult: {}", result);
-
-//     /*------------------------------------------------------------------*/
-//     // Bind buffer to memory:
-
-//     vkBindBufferMemory(device, buffer, buffer_memory, 0);
-
-//     return { buffer, buffer_memory };
-// }
-
-// void VulkanApp::copy_buffer(VkBuffer src, VkBuffer dst, VkDeviceSize size)
-// {
-//     assert(device);
-//     assert(command_pool);
-//     assert(graphics_queue);
-
-//     auto command_buffer = begin_single_time_commands();
-
-//     const VkBufferCopy copy_region { .size = size };
-//     vkCmdCopyBuffer(command_buffer, src, dst, 1, &copy_region);
-
-//     end_single_time_commands(command_buffer);
-// }
+    SingleTimeCommandBuffer cmdbuf { device, command_pool, transfer_queue };
+    cmdbuf->copyBuffer(src, dst, std::vector<vk::BufferCopy> { {.size = size } });
+    cmdbuf.submit();
+}
+}

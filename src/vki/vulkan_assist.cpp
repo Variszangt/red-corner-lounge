@@ -2,6 +2,8 @@
 
 #include "error.h"
 
+namespace vki
+{
 vk::UniqueFence create_fence(const vk::Device device)
 {
     vk::FenceCreateInfo createinfo {
@@ -19,11 +21,6 @@ SingleTimeCommandBuffer::SingleTimeCommandBuffer(
     command_pool { command_pool },
     queue { queue }
 {
-    
-}
-
-vk::CommandBuffer SingleTimeCommandBuffer::begin()
-{
     assert(device);
     assert(command_pool);
     assert(queue);
@@ -40,7 +37,6 @@ vk::CommandBuffer SingleTimeCommandBuffer::begin()
         .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
     };
     command_buffer->begin(begin_info);
-    return command_buffer.get();
 }
 
 void SingleTimeCommandBuffer::submit()
@@ -61,4 +57,5 @@ void SingleTimeCommandBuffer::submit()
     const auto res = device.waitForFences(std::vector<vk::Fence>{ fence.get() }, VK_TRUE, UINT64_MAX);
     if (res != vk::Result::eSuccess)
         THROW_ERROR("unexpected lack of success: {}", res);
+}
 }
