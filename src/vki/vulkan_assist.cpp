@@ -131,7 +131,7 @@ std::pair<vk::UniqueImage, vk::UniqueDeviceMemory> create_image(
         .tiling         = vk::ImageTiling::eOptimal,
         .usage          = createinfo.usage,
         .sharingMode    = vk::SharingMode::eExclusive,
-        .initialLayout  = createinfo.initial_layout,
+        .initialLayout  = vk::ImageLayout::eUndefined,
     };
     auto image = device.createImageUnique(image_createinfo);
 
@@ -149,6 +149,86 @@ std::pair<vk::UniqueImage, vk::UniqueDeviceMemory> create_image(
     // Bind and return:
     vkBindImageMemory(device, image.get(), image_memory.get(), 0);
     return std::make_pair(std::move(image), std::move(image_memory));
+}
+
+void set_image_layout(
+    const DeviceWrapper& device_wrapper,
+    const ImageLayoutTransitionInfo& transition_info)
+{
+    auto device         = device_wrapper.device.get();
+    auto command_pool   = device_wrapper.command_pools.graphics.get();
+    auto graphics_queue = device_wrapper.queues.graphics;
+
+    assert(device);
+    assert(command_pool);
+    assert(graphics_queue);
+
+    // Create an image-memory-barrier object
+    vk::ImageMemoryBarrier barrier {
+        .oldLayout          = transition_info.old_layout,
+        .newLayout          = transition_info.new_layout,
+        .image              = transition_info.image,
+        .subresourceRange   = transition_info.subresource_range,
+    };
+
+    // Old layout, source access mask:
+    switch (transition_info.old_layout)
+    {
+    case vk::ImageLayout::ePreinitialized:
+        barrier.srcAccessMask = vk::AccessFlagBits::eHostWrite;
+        break;
+    case vk::ImageLayout::eColorAttachmentOptimal:
+        barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead;
+        break;
+    case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+        barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+        break;
+    case vk::ImageLayout::eTransferSrcOptimal:
+        barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+        break;
+    case vk::ImageLayout::eTransferDstOptimal:
+        barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+        break;
+    case vk::ImageLayout::eShaderReadOnlyOptimal:
+        barrier.srcAccessMask = vk::AccessFlagBits::eShaderRead;
+        break;
+    default:
+        assert(!"unknown source layout");
+        break;
+    }
+
+    // New layout, destination access mask:
+    switch (transition_info.new_layout)
+    {
+    case vk::ImageLayout::eTransferDstOptimal:
+        barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+        break;
+    case vk::ImageLayout::eTransferSrcOptimal:
+        barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+        break;
+    case vk::ImageLayout::eColorAttachmentOptimal:
+        barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead;
+        break;
+    case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+        barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+        break;
+    case vk::ImageLayout::eShaderReadOnlyOptimal:
+        barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+        break;
+    default:
+        assert(!"unknown source layout");
+        break;
+    }
+
+    SingleTimeCommandBuffer cmdbuf { device, command_pool, graphics_queue };
+    cmdbuf->pipelineBarrier(
+        transition_info.src_stage_mask,
+        transition_info.dst_stage_mask,
+        vk::DependencyFlags {},
+        std::vector<vk::MemoryBarrier> {},
+        std::vector<vk::BufferMemoryBarrier> {},
+        std::vector<vk::ImageMemoryBarrier> { barrier });
+    cmdbuf.submit();
 }
 
 }
