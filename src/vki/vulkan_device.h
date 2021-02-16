@@ -36,7 +36,7 @@ struct DeviceWrapper
         vk::UniqueCommandPool compute;
     } command_pools;
     
-    // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (each i-th bit of the filter specifies a memory type index).
+    // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (filter is a bitmask, where each i-th bit of the filter specifies a memory type index).
     uint32_t get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties) const;
 };
 
