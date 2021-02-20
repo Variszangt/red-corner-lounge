@@ -11,7 +11,7 @@ void init_default_dispatcher()
 {
     // 1. Initialize default dispatcher with non-dependent function pointers:
     static vk::DynamicLoader dl;
-    PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+    auto vkGetInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
 
     // 2. Default dispatcher must be initialized with an instance as soon as one is created!
@@ -82,4 +82,5 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         .debug               = init_info.config.vulkan_debug,
     };
     device_wrapper = vki::create_device(device_createinfo);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(device_wrapper.device.get());
 }
