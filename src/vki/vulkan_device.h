@@ -8,12 +8,12 @@ namespace vki
 {
 struct DeviceWrapper
 {
-    vk::PhysicalDevice physical_device;
-    vk::UniqueDevice device;
+    vk::PhysicalDevice  physical_device;
+    vk::UniqueDevice    device;
     
-    vk::PhysicalDeviceFeatures enabled_features;
-    vk::PhysicalDeviceProperties properties;
-    vk::PhysicalDeviceMemoryProperties memory_properties;
+    vk::PhysicalDeviceFeatures          enabled_features;
+    vk::PhysicalDeviceProperties        properties;
+    vk::PhysicalDeviceMemoryProperties  memory_properties;
     
     struct QueueFamilyIndices
     {

@@ -17,10 +17,10 @@
 
 struct VulkanInitInfo
 {
-    const Config& config;
-    const std::string application_name;
+    const Config&                   config;
+    const std::string               application_name;
     const std::tuple<int, int, int> application_version; // <major, minor, patch>
-    const vkfw::Window& window;
+    const vkfw::Window&             window;
 };
 
 /*------------------------------------------------------------------*/
@@ -32,9 +32,9 @@ public:
     void init(const VulkanInitInfo& init_info);
 
 private:
-    vk::UniqueInstance instance;
-    vk::UniqueDebugUtilsMessengerEXT debug_messenger;
-    vk::UniqueSurfaceKHR surface;
+    vk::UniqueInstance                  instance;
+    vk::UniqueDebugUtilsMessengerEXT    debug_messenger;
+    vk::UniqueSurfaceKHR                surface;
 
-    vki::DeviceWrapper device_wrapper;
+    vki::DeviceWrapper  device_wrapper;
 };
