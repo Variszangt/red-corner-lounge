@@ -69,6 +69,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
 
     };
 
+    // When adding device features, see DeviceCreateInfo::required_features!
     const vk::PhysicalDeviceFeatures required_device_features {
         .sampleRateShading = VK_TRUE,
         .samplerAnisotropy = VK_TRUE,
@@ -82,5 +83,13 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         .debug               = init_info.config.vulkan_debug,
     };
     device_wrapper = vki::create_device(device_createinfo);
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(device_wrapper.device.get());
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(device_wrapper.get());
+
+    /*------------------------------------------------------------------*/
+    // Create swapchain:
+
+    // TODO:
+    // Create swapchain
+    // Swapchain/device creation order? (for generalizing a on-resize-function)
+    // 
 }

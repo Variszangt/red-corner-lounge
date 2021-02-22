@@ -135,7 +135,7 @@ vk::ImageSubresourceRange create_ISR(
 
 ImageWrapper create_image(const DeviceWrapper& device_wrapper, const ImageCreateInfo& createinfo)
 {
-    const auto device = device_wrapper.device.get();
+    const auto device = device_wrapper.get();
     assert(device);
 
     // Create image:
@@ -171,7 +171,7 @@ ImageWrapper create_image(const DeviceWrapper& device_wrapper, const ImageCreate
     // Derive aspect flags:
     vk::ImageAspectFlags aspect_flags;
 
-    if (createinfo.usage | vk::ImageUsageFlagBits::eColorAttachment)
+    if (createinfo.usage | vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled)
         aspect_flags |= vk::ImageAspectFlagBits::eColor;
     if (createinfo.usage | vk::ImageUsageFlagBits::eDepthStencilAttachment)
         aspect_flags |= vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
@@ -190,7 +190,8 @@ ImageWrapper create_image(const DeviceWrapper& device_wrapper, const ImageCreate
 
     // Transfer layout if specified:
     if (createinfo.initial_layout != vk::ImageLayout::eUndefined)
-        set_image_layout(device_wrapper, image_wrapper, createinfo.initial_layout);
+        set_image_layout(device_wrapper, image_wrapper, createinfo.initial_layout,
+        vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eAllCommands);
 
     // Return:
     return std::move(image_wrapper);
@@ -203,10 +204,10 @@ void set_image_layout(
     const vk::PipelineStageFlags    src_stage_mask,
     const vk::PipelineStageFlags    dst_stage_mask)
 {
-    auto device         = device_wrapper.device.get();
+    auto device         = device_wrapper.get();
     auto command_pool   = device_wrapper.command_pools.graphics.get();
     auto graphics_queue = device_wrapper.queues.graphics;
-    auto image          = image_wrapper.image.get();
+    auto image          = image_wrapper.get();
 
     assert(device);
     assert(command_pool);
@@ -225,6 +226,9 @@ void set_image_layout(
     // Old layout, source access mask:
     switch (old_layout)
     {
+    case vk::ImageLayout::eUndefined:
+        barrier.srcAccessMask = {};
+        break;
     case vk::ImageLayout::ePreinitialized:
         barrier.srcAccessMask = vk::AccessFlagBits::eHostWrite;
         break;
@@ -292,7 +296,7 @@ void copy_buffer_to_image(
     auto device         = device_wrapper.device.get();
     auto command_pool   = device_wrapper.command_pools.graphics.get();
     auto graphics_queue = device_wrapper.queues.graphics;
-    auto image          = image_wrapper.image.get();
+    auto image          = image_wrapper.get();
 
     assert(device);
     assert(command_pool);
@@ -301,10 +305,9 @@ void copy_buffer_to_image(
 
     // Assure correct layout:
     const auto previous_layout = image_wrapper.layout;
-    if (image_wrapper.layout != vk::ImageLayout::eTransferDstOptimal ||
-        image_wrapper.layout != vk::ImageLayout::eGeneral ||
-        image_wrapper.layout != vk::ImageLayout::eSharedPresentKHR)
-        set_image_layout(device_wrapper, image_wrapper, vk::ImageLayout::eTransferDstOptimal);
+    if (image_wrapper.layout != vk::ImageLayout::eTransferDstOptimal)
+        set_image_layout(device_wrapper, image_wrapper, vk::ImageLayout::eTransferDstOptimal,
+        vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer);
 
     // Copy:
     const vk::BufferImageCopy region {
@@ -317,7 +320,8 @@ void copy_buffer_to_image(
 
     // Reverse layout if necessary:
     if (image_wrapper.layout != previous_layout)
-        set_image_layout(device_wrapper, image_wrapper, previous_layout);
+        set_image_layout(device_wrapper, image_wrapper, previous_layout,
+        vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands);
 }
 
 void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wrapper)
@@ -325,7 +329,7 @@ void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wra
     auto device         = device_wrapper.device.get();
     auto command_pool   = device_wrapper.command_pools.graphics.get();
     auto graphics_queue = device_wrapper.queues.graphics;
-    auto image          = image_wrapper.image.get();
+    auto image          = image_wrapper.get();
 
     assert(device);
     assert(command_pool);

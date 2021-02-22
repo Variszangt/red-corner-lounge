@@ -22,6 +22,10 @@ add_executable(${TARGET_NAME}
     src/vki/vulkan_instance.cpp
     src/vki/vulkan_device.h
     src/vki/vulkan_device.cpp
+    src/vki/vulkan_texture.h
+    src/vki/vulkan_texture.cpp
+    src/vki/vulkan_swapchain.h
+    src/vki/vulkan_swapchain.cpp
     src/vki/vulkan_interface.h
     src/vki/vulkan_interface.cpp
     
@@ -58,6 +62,10 @@ find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE glfw)
 # VKFW (GLFW Modern Cpp binding)
 target_include_directories(${TARGET_NAME} PRIVATE external/vkfw/include)
+
+# stb
+find_path(STB_INCLUDE_DIRS "stb.h")
+target_include_directories(${TARGET_NAME} PRIVATE ${STB_INCLUDE_DIRS})
 
 # GLM
 find_package(glm CONFIG REQUIRED)

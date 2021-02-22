@@ -23,7 +23,7 @@ class SingleTimeCommandBuffer
 {
 public:
     SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue); // Allocates a new command buffer on the specified command pool and begins recording. Queued (->) commands will be submitted to the specified queue upon calling submit().
-    void submit(); // Command buffer is cleaned after use!
+    void submit(); // Blocks until finished.
 
     vk::CommandBuffer* operator->() { return &cmdbuf.get(); }
 
@@ -42,6 +42,8 @@ struct BufferWrapper
     vk::UniqueBuffer        buffer;
     vk::UniqueDeviceMemory  memory;
     vk::DeviceSize          size;
+
+    vk::Buffer get() const { return buffer.get(); }
 };
 
 BufferWrapper create_buffer(
@@ -75,6 +77,8 @@ struct ImageWrapper
     vk::Format              format;
     vk::Extent2D            size;
     uint32_t                mip_levels;
+
+    vk::Image get() const { return image.get(); }
 };
 
 struct ImageCreateInfo
@@ -93,8 +97,8 @@ void set_image_layout(
     const DeviceWrapper&            device_wrapper,
     ImageWrapper&                   image_wrapper,
     const vk::ImageLayout           new_layout,
-    const vk::PipelineStageFlags    src_stage_mask = vk::PipelineStageFlagBits::eAllCommands,
-    const vk::PipelineStageFlags    dst_stage_mask = vk::PipelineStageFlagBits::eAllCommands);
+    const vk::PipelineStageFlags    src_stage_mask, 
+    const vk::PipelineStageFlags    dst_stage_mask); // Since this is a blocking function, dst_stage_mask is technically redundant, but should nevertheless be provided for completeness and clarity.
 
 void copy_buffer_to_image(
     const DeviceWrapper&    device_wrapper,
