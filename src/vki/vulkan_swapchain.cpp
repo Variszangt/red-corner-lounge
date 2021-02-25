@@ -1,6 +1,7 @@
 #include "vulkan_swapchain.h"
 
 #include "utility.h"
+#include "vulkan_assist.h"
 
 namespace vki
 {
@@ -101,14 +102,30 @@ SwapchainWrapper create_swapchain(
 
     auto images = device.getSwapchainImagesKHR(swapchain.get());
 
+    std::vector<vk::UniqueImageView> image_views;
+    image_views.reserve(images.size());
+    for (const auto image : images)
+    {
+        image_views.push_back(device.createImageViewUnique(
+            vk::ImageViewCreateInfo {
+                .image              = image,
+                .viewType           = vk::ImageViewType::e2D,
+                .format             = surface_format.format,
+                .subresourceRange   = create_ISR(vk::ImageAspectFlagBits::eColor),
+            }
+        ));
+    }
+
     /*------------------------------------------------------------------*/
     // Return:
 
     return SwapchainWrapper {
-        .swapchain  = std::move(swapchain),
-        .format     = surface_format.format,
-        .colorspace = surface_format.colorSpace,
-        .images     = std::move(images),
+        .swapchain   = std::move(swapchain),
+        .format      = std::move(surface_format.format),
+        .colorspace  = std::move(surface_format.colorSpace),
+        .extent      = std::move(extent),
+        .images      = std::move(images),
+        .image_views = std::move(image_views),
     };
 }
 }

@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <vki/vulkan_device.h>
+#include "vulkan_device.h"
 
 /*------------------------------------------------------------------*/
 // The functions in this unit are simple at the cost of performance. Use of these functions should be limited to prototyping only.
@@ -107,4 +107,11 @@ void copy_buffer_to_image(
 
 // Generates mipmaps for an existing and filled image.
 void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wrapper);
+
+vk::UniqueImageView create_image_view(
+    const DeviceWrapper&            device_wrapper,
+    const vk::Image                 image,
+    const vk::Format                format,
+    const vk::ImageSubresourceRange range);
+
 }

@@ -26,6 +26,8 @@ add_executable(${TARGET_NAME}
     src/vki/vulkan_texture.cpp
     src/vki/vulkan_swapchain.h
     src/vki/vulkan_swapchain.cpp
+    src/vki/vulkan_renderpass.h
+    src/vki/vulkan_renderpass.cpp
     src/vki/vulkan_interface.h
     src/vki/vulkan_interface.cpp
     

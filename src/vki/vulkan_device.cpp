@@ -58,6 +58,14 @@ uint32_t get_queue_family_index(const vk::PhysicalDevice device, vk::QueueFlags 
     THROW_ERROR("required queue family could not be found: {}", static_cast<uint32_t>(required_flags));
 }
 
+#define CHECK_FEATURE_SUPPORT(feature)                                                          \
+    if (createinfo.required_features.feature && !available_features.feature)                    \
+    {                                                                                           \
+        if (createinfo.debug >= VulkanDebug::On)                                                \
+            LOG_WARNING("gpu does not support {}", #feature);                                   \
+        return false;                                                                           \
+    }
+
 vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
 {
     assert(createinfo.instance);
@@ -100,16 +108,81 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     };
 
     /*------------------------------------------------------------------*/
+    // Check availability of required features:
+
+    auto supports_all_required_features = [&](const vk::PhysicalDevice device)
+    {
+        const auto available_features = device.getFeatures();
+
+        CHECK_FEATURE_SUPPORT(robustBufferAccess);
+        CHECK_FEATURE_SUPPORT(fullDrawIndexUint32);
+        CHECK_FEATURE_SUPPORT(imageCubeArray);
+        CHECK_FEATURE_SUPPORT(independentBlend);
+        CHECK_FEATURE_SUPPORT(geometryShader);
+        CHECK_FEATURE_SUPPORT(tessellationShader);
+        CHECK_FEATURE_SUPPORT(sampleRateShading);
+        CHECK_FEATURE_SUPPORT(dualSrcBlend);
+        CHECK_FEATURE_SUPPORT(logicOp);
+        CHECK_FEATURE_SUPPORT(multiDrawIndirect);
+        CHECK_FEATURE_SUPPORT(drawIndirectFirstInstance);
+        CHECK_FEATURE_SUPPORT(depthClamp);
+        CHECK_FEATURE_SUPPORT(depthBiasClamp);
+        CHECK_FEATURE_SUPPORT(fillModeNonSolid);
+        CHECK_FEATURE_SUPPORT(depthBounds);
+        CHECK_FEATURE_SUPPORT(wideLines);
+        CHECK_FEATURE_SUPPORT(largePoints);
+        CHECK_FEATURE_SUPPORT(alphaToOne);
+        CHECK_FEATURE_SUPPORT(multiViewport);
+        CHECK_FEATURE_SUPPORT(samplerAnisotropy);
+        CHECK_FEATURE_SUPPORT(textureCompressionETC2);
+        CHECK_FEATURE_SUPPORT(textureCompressionASTC_LDR);
+        CHECK_FEATURE_SUPPORT(textureCompressionBC);
+        CHECK_FEATURE_SUPPORT(occlusionQueryPrecise);
+        CHECK_FEATURE_SUPPORT(pipelineStatisticsQuery);
+        CHECK_FEATURE_SUPPORT(vertexPipelineStoresAndAtomics);
+        CHECK_FEATURE_SUPPORT(fragmentStoresAndAtomics);
+        CHECK_FEATURE_SUPPORT(shaderTessellationAndGeometryPointSize);
+        CHECK_FEATURE_SUPPORT(shaderImageGatherExtended);
+        CHECK_FEATURE_SUPPORT(shaderStorageImageExtendedFormats);
+        CHECK_FEATURE_SUPPORT(shaderStorageImageMultisample);
+        CHECK_FEATURE_SUPPORT(shaderStorageImageReadWithoutFormat);
+        CHECK_FEATURE_SUPPORT(shaderStorageImageWriteWithoutFormat);
+        CHECK_FEATURE_SUPPORT(shaderUniformBufferArrayDynamicIndexing);
+        CHECK_FEATURE_SUPPORT(shaderSampledImageArrayDynamicIndexing);
+        CHECK_FEATURE_SUPPORT(shaderStorageBufferArrayDynamicIndexing);
+        CHECK_FEATURE_SUPPORT(shaderStorageImageArrayDynamicIndexing);
+        CHECK_FEATURE_SUPPORT(shaderClipDistance);
+        CHECK_FEATURE_SUPPORT(shaderCullDistance);
+        CHECK_FEATURE_SUPPORT(shaderFloat64);
+        CHECK_FEATURE_SUPPORT(shaderInt64);
+        CHECK_FEATURE_SUPPORT(shaderInt16);
+        CHECK_FEATURE_SUPPORT(shaderResourceResidency);
+        CHECK_FEATURE_SUPPORT(shaderResourceMinLod);
+        CHECK_FEATURE_SUPPORT(sparseBinding);
+        CHECK_FEATURE_SUPPORT(sparseResidencyBuffer);
+        CHECK_FEATURE_SUPPORT(sparseResidencyImage2D);
+        CHECK_FEATURE_SUPPORT(sparseResidencyImage3D);
+        CHECK_FEATURE_SUPPORT(sparseResidency2Samples);
+        CHECK_FEATURE_SUPPORT(sparseResidency4Samples);
+        CHECK_FEATURE_SUPPORT(sparseResidency8Samples);
+        CHECK_FEATURE_SUPPORT(sparseResidency16Samples);
+        CHECK_FEATURE_SUPPORT(sparseResidencyAliased);
+        CHECK_FEATURE_SUPPORT(variableMultisampleRate);
+        CHECK_FEATURE_SUPPORT(inheritedQueries);
+
+        return true;
+    };
+
+    /*------------------------------------------------------------------*/
     // Filter and rate available devices:
 
     std::multimap<int, vk::PhysicalDevice> device_ratings;
     for (const auto& device : physical_devices)
     {
-        int rating = 0; // TODO: Currently we pick a random device that supports ALL required features/extensions. For better support of older hardware, we should instead consider a rating system that would allow for subpar devices to be picked (in case no better alternatives are present).
+        int rating = 0; // TODO: Currently we pick a random device that supports ALL required features/extensions. For better support of older hardware, we should instead consider a rating system that would allow for subpar devices to be picked.
         bool supports_minimal_requirements = true;
 
         const auto device_properties = device.getProperties();
-        const auto device_features   = device.getFeatures();
 
         if (createinfo.debug >= VulkanDebug::On)
             LOG_INFO("rating gpu: {}", device_properties.deviceName);
@@ -121,18 +194,11 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
                 LOG_WARNING("gpu does not support all required extensions");
         }
 
-        if (createinfo.required_features.samplerAnisotropy && !device_features.samplerAnisotropy)
+        if (!supports_all_required_features(device))
         {
             supports_minimal_requirements = false;
             if (createinfo.debug >= VulkanDebug::On)
-                LOG_WARNING("gpu does not support anisotropic sampling");
-        }
-
-        if (createinfo.required_features.sampleRateShading && !device_features.sampleRateShading)
-        {
-            supports_minimal_requirements = false;
-            if (createinfo.debug >= VulkanDebug::On)
-                LOG_WARNING("gpu does not support sample rate shading");
+                LOG_WARNING("gpu does not support all required features");
         }
 
         if (supports_minimal_requirements)
@@ -172,7 +238,7 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
 
     /*------------------------------------------------------------------*/
     // Prepare queue createinfos:
-    
+
     const std::set<uint32_t> unique_indices = { // Filter only unique indices, as some may overlap.
         queue_family_indices.graphics,
         queue_family_indices.transfer,
@@ -218,7 +284,7 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
     {
         return device->createCommandPoolUnique(vk::CommandPoolCreateInfo { .queueFamilyIndex = index });
     };
-    
+
     DeviceWrapper::CommandPools command_pools {
         .graphics = create_command_pool(queue_family_indices.graphics),
         .transfer = create_command_pool(queue_family_indices.graphics),

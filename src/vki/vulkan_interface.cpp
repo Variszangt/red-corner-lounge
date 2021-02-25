@@ -2,6 +2,9 @@
 
 #include "vulkan_debug.h"
 
+#include "vulkan_instance.h"
+#include "vulkan_renderpass.h"
+
 /*------------------------------------------------------------------*/
 // Default dispatcher:
 
@@ -66,15 +69,13 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     // Create device:
 
     const std::vector<const char*>required_device_extensions {
-
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
-    // When adding device features, see DeviceCreateInfo::required_features!
     const vk::PhysicalDeviceFeatures required_device_features {
         .sampleRateShading = VK_TRUE,
         .samplerAnisotropy = VK_TRUE,
-    };
-
+    }; 
     const vki::DeviceCreateInfo device_createinfo {
         .instance            = instance.get(),
         .surface             = surface.get(),
@@ -88,8 +89,30 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     /*------------------------------------------------------------------*/
     // Create swapchain:
 
-    // TODO:
-    // Create swapchain
-    // Swapchain/device creation order? (for generalizing a on-resize-function)
-    // 
+    auto [width, height] = init_info.window.getSize();
+    create_swapchain(width, height);
+    
+    /*------------------------------------------------------------------*/
+    // Renderpass:
+
+    // auto renderpass = vki::create_renderpass(
+    //     device_wrapper,
+    //     swapchain_wrapper.format,
+    //     vk::Format::eR8G8Srgb,
+    //     vki::RenderPassType::ColorAndDepthStencil
+    // );
+    // renderpass.reset();
+}
+
+void Vulkan::create_swapchain(const size_t width, const size_t height)
+{
+    assert(device_wrapper.get());
+    assert(surface.get());
+    
+    swapchain_wrapper = vki::create_swapchain(
+        device_wrapper,
+        surface.get(),
+        vk::Extent2D { static_cast<uint32_t>(width), static_cast<uint32_t>(height) },
+        swapchain_wrapper.get()
+    );
 }

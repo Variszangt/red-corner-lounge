@@ -1,7 +1,8 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
-#include "vki/vulkan_device.h"
+#include <vulkan/vulkan.hpp>
+
+#include "vulkan_device.h"
 
 namespace vki
 {
@@ -10,8 +11,11 @@ struct SwapchainWrapper
     vk::UniqueSwapchainKHR  swapchain;
     vk::Format              format;
     vk::ColorSpaceKHR       colorspace;
-    std::vector<vk::Image>  images;
-
+    vk::Extent2D            extent;
+    
+    std::vector<vk::Image>              images;
+    std::vector<vk::UniqueImageView>    image_views;
+    
     vk::SwapchainKHR get() { return swapchain.get(); }
 };
 

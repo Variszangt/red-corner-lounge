@@ -6,9 +6,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "config.h"
-#include "vki/vulkan_instance.h"
-#include "vki/vulkan_device.h"
-#include "vki/vulkan_swapchain.h"
+#include "vulkan_device.h"
+#include "vulkan_swapchain.h"
 
 /*------------------------------------------------------------------*/
 // All Vulkan-related code shall be written in the vki ("vulkan interface") subfolder/namespace. This header, in turn, serves as the interface to any such code - it is the only Vulkan header that application code should ever include.
@@ -31,12 +30,13 @@ class Vulkan
 {
 public:
     void init(const VulkanInitInfo& init_info);
+    void create_swapchain(const size_t width, const size_t height);
 
 private:
     vk::UniqueInstance                  instance;
     vk::UniqueDebugUtilsMessengerEXT    debug_messenger;
     vk::UniqueSurfaceKHR                surface;
 
-    vki::DeviceWrapper      device;
-    vki::SwapchainWrapper   swapchain;
+    vki::DeviceWrapper      device_wrapper;
+    vki::SwapchainWrapper   swapchain_wrapper;
 };

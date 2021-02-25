@@ -13,10 +13,9 @@ vk::UniqueFence create_fence(const vk::Device device)
 }
 
 SingleTimeCommandBuffer::SingleTimeCommandBuffer(
-    const vk::Device device,
-    const vk::CommandPool command_pool,
-    const vk::Queue queue
-) :
+    const vk::Device        device,
+    const vk::CommandPool   command_pool,
+    const vk::Queue         queue) :
     device { device },
     command_pool { command_pool },
     queue { queue }
@@ -68,7 +67,7 @@ BufferWrapper create_buffer(
     const vk::BufferUsageFlags      usage,
     const vk::MemoryPropertyFlags   mem_properties)
 {
-    const auto device = device_wrapper.device.get();
+    const auto device = device_wrapper.get();
     assert(device);
 
     // Create buffer:
@@ -104,7 +103,7 @@ void copy_buffer(
     const vk::Buffer        dst,
     const vk::DeviceSize    size)
 {
-    auto device         = device_wrapper.device.get();
+    auto device         = device_wrapper.get();
     auto command_pool   = device_wrapper.command_pools.transfer.get();
     auto transfer_queue = device_wrapper.queues.transfer;
 
@@ -233,7 +232,7 @@ void set_image_layout(
         barrier.srcAccessMask = vk::AccessFlagBits::eHostWrite;
         break;
     case vk::ImageLayout::eColorAttachmentOptimal:
-        barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead;
+        barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
         break;
     case vk::ImageLayout::eDepthStencilAttachmentOptimal:
         barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
@@ -262,7 +261,7 @@ void set_image_layout(
         barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
         break;
     case vk::ImageLayout::eColorAttachmentOptimal:
-        barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eColorAttachmentRead;
+        barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
         break;
     case vk::ImageLayout::eDepthStencilAttachmentOptimal:
         barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
@@ -293,7 +292,7 @@ void copy_buffer_to_image(
     const vk::Buffer        buffer,
     ImageWrapper&           image_wrapper)
 {
-    auto device         = device_wrapper.device.get();
+    auto device         = device_wrapper.get();
     auto command_pool   = device_wrapper.command_pools.graphics.get();
     auto graphics_queue = device_wrapper.queues.graphics;
     auto image          = image_wrapper.get();
@@ -307,7 +306,7 @@ void copy_buffer_to_image(
     const auto previous_layout = image_wrapper.layout;
     if (image_wrapper.layout != vk::ImageLayout::eTransferDstOptimal)
         set_image_layout(device_wrapper, image_wrapper, vk::ImageLayout::eTransferDstOptimal,
-        vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer);
+                         vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer);
 
     // Copy:
     const vk::BufferImageCopy region {
@@ -321,7 +320,7 @@ void copy_buffer_to_image(
     // Reverse layout if necessary:
     if (image_wrapper.layout != previous_layout)
         set_image_layout(device_wrapper, image_wrapper, previous_layout,
-        vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands);
+                         vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands);
 }
 
 void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wrapper)
@@ -451,6 +450,24 @@ void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wra
     );
 
     cmdbuf.submit();
+}
+
+vk::UniqueImageView create_image_view(
+    const DeviceWrapper&            device_wrapper,
+    const vk::Image                 image,
+    const vk::Format                format,
+    const vk::ImageSubresourceRange range)
+{
+    auto device = device_wrapper.get();
+    assert(device);
+
+    const vk::ImageViewCreateInfo createinfo {
+        .image              = image,
+        .viewType           = vk::ImageViewType::e2D,
+        .format             = format,
+        .subresourceRange   = range,
+    };
+    return device.createImageViewUnique(createinfo);
 }
 
 }
