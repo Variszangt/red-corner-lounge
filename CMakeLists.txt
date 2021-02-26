@@ -14,6 +14,8 @@ add_executable(${TARGET_NAME}
     src/app.h
     src/app.cpp
   
+    src/vki/vertex.h
+    src/vki/vertex.cpp
     src/vki/vulkan_assist.h
     src/vki/vulkan_assist.cpp
     src/vki/vulkan_debug.h
@@ -22,17 +24,18 @@ add_executable(${TARGET_NAME}
     src/vki/vulkan_instance.cpp
     src/vki/vulkan_device.h
     src/vki/vulkan_device.cpp
-    src/vki/vulkan_texture.h
-    src/vki/vulkan_texture.cpp
     src/vki/vulkan_swapchain.h
     src/vki/vulkan_swapchain.cpp
     src/vki/vulkan_renderpass.h
     src/vki/vulkan_renderpass.cpp
+    src/vki/vulkan_pipeline.h
+    src/vki/vulkan_pipeline.cpp
     src/vki/vulkan_interface.h
     src/vki/vulkan_interface.cpp
     
     src/error.h
     src/json.h
+    src/glm.h
 )
 
 # Local include folder:

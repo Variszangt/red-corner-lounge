@@ -6,6 +6,9 @@
 
 namespace vki
 {
+/*------------------------------------------------------------------*/
+// DeviceWrapper:
+
 struct DeviceWrapper
 {
     vk::PhysicalDevice  physical_device;

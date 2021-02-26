@@ -6,6 +6,9 @@
 
 namespace vki
 {
+/*------------------------------------------------------------------*/
+// Renderpass:
+
 enum class RenderPassType
 {
     ColorAndDepthStencil,

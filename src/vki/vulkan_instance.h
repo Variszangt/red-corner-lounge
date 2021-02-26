@@ -9,6 +9,9 @@
 
 namespace vki
 {
+/*------------------------------------------------------------------*/
+// Instance:
+
 struct InstanceCreateInfo
 {
     std::string                 application_name;
@@ -16,5 +19,5 @@ struct InstanceCreateInfo
     std::vector<const char*>    required_extensions;
     VulkanDebug                 debug; // If debug is enabled, instance will be created with validation layers and debug-utils extension enabled (see also: vulkan_debug.h).
 };
-vk::UniqueInstance create_instance(const InstanceCreateInfo& ci);
+vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo);
 }

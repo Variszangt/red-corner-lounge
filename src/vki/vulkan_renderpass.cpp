@@ -76,10 +76,10 @@ vk::UniqueRenderPass create_renderpass(
     const vk::SubpassDependency enter_main_subpass {
         .srcSubpass         = VK_SUBPASS_EXTERNAL,
         .dstSubpass         = {},
-        .srcStageMask       = vk::PipelineStageFlagBits::eBottomOfPipe,
+        .srcStageMask       = vk::PipelineStageFlagBits::eAllCommands,
         .dstStageMask       = vk::PipelineStageFlagBits::eColorAttachmentOutput,
         .srcAccessMask      = vk::AccessFlagBits::eMemoryRead,
-        .dstAccessMask      = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite,
+        .dstAccessMask      = vk::AccessFlagBits::eColorAttachmentWrite,
         .dependencyFlags    = vk::DependencyFlagBits::eByRegion,
     };
 
@@ -88,7 +88,7 @@ vk::UniqueRenderPass create_renderpass(
         .dstSubpass         = VK_SUBPASS_EXTERNAL,
         .srcStageMask       = vk::PipelineStageFlagBits::eColorAttachmentOutput,
         .dstStageMask       = vk::PipelineStageFlagBits::eBottomOfPipe,
-        .srcAccessMask      = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite,
+        .srcAccessMask      = vk::AccessFlagBits::eColorAttachmentWrite,
         .dstAccessMask      = vk::AccessFlagBits::eMemoryRead,
         .dependencyFlags    = vk::DependencyFlagBits::eByRegion,
     };

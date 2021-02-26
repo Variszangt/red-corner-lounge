@@ -1,5 +1,7 @@
 #include "vulkan_assist.h"
 
+#include <fstream>
+
 #include "error.h"
 
 namespace vki
@@ -452,22 +454,35 @@ void create_mipmaps(const DeviceWrapper& device_wrapper, ImageWrapper& image_wra
     cmdbuf.submit();
 }
 
-vk::UniqueImageView create_image_view(
-    const DeviceWrapper&            device_wrapper,
-    const vk::Image                 image,
-    const vk::Format                format,
-    const vk::ImageSubresourceRange range)
+vk::UniqueShaderModule create_shader_module(const DeviceWrapper& device_wrapper, const std::string& shader_path)
 {
     auto device = device_wrapper.get();
     assert(device);
 
-    const vk::ImageViewCreateInfo createinfo {
-        .image              = image,
-        .viewType           = vk::ImageViewType::e2D,
-        .format             = format,
-        .subresourceRange   = range,
+    /*------------------------------------------------------------------*/
+    // Read binary file:
+    
+    std::ifstream file(shader_path, std::ios::ate | std::ios::binary);
+    if (!file)
+        THROW_ERROR("file could not be opened for reading: {}", shader_path);
+
+    const size_t file_size = file.tellg();
+    std::vector<char> bytecode(file_size);
+    file.seekg(0);
+    file.read(bytecode.data(), file_size);
+    file.close();
+    
+    if (bytecode.empty())
+        THROW_ERROR("empty shader bytecode; file: {}", shader_path);
+
+    /*------------------------------------------------------------------*/
+    // Create and return:
+    
+    const vk::ShaderModuleCreateInfo createinfo {
+        .codeSize   = bytecode.size(),
+        .pCode      = reinterpret_cast<const uint32_t*>(bytecode.data())
     };
-    return device.createImageViewUnique(createinfo);
+    return device.createShaderModuleUnique(createinfo);
 }
 
 }

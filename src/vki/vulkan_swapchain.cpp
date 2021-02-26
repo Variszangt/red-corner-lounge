@@ -106,14 +106,13 @@ SwapchainWrapper create_swapchain(
     image_views.reserve(images.size());
     for (const auto image : images)
     {
-        image_views.push_back(device.createImageViewUnique(
-            vk::ImageViewCreateInfo {
-                .image              = image,
-                .viewType           = vk::ImageViewType::e2D,
-                .format             = surface_format.format,
-                .subresourceRange   = create_ISR(vk::ImageAspectFlagBits::eColor),
-            }
-        ));
+        vk::ImageViewCreateInfo view_createinfo {
+            .image              = image,
+            .viewType           = vk::ImageViewType::e2D,
+            .format             = surface_format.format,
+            .subresourceRange   = create_ISR(vk::ImageAspectFlagBits::eColor),
+        };
+        image_views.push_back(device.createImageViewUnique(view_createinfo));
     }
 
     /*------------------------------------------------------------------*/

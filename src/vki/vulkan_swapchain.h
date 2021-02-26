@@ -6,6 +6,9 @@
 
 namespace vki
 {
+/*------------------------------------------------------------------*/
+// SwapchainWrapper:
+
 struct SwapchainWrapper
 {
     vk::UniqueSwapchainKHR  swapchain;
