@@ -17,13 +17,6 @@ vk::UniqueDescriptorSetLayout create_descriptor_set_layout(const DeviceWrapper& 
         .stageFlags         = vk::ShaderStageFlagBits::eVertex,
     };
 
-    // const vk::DescriptorSetLayoutBinding sampler_layout_binding {
-    //     .binding            = 1,
-    //     .descriptorType     = vk::DescriptorType::eCombinedImageSampler,
-    //     .descriptorCount    = 1,
-    //     .stageFlags         = vk::ShaderStageFlagBits::eFragment,
-    // };
-
     const std::vector<vk::DescriptorSetLayoutBinding> bindings {
         ubo_layout_binding,
     };
