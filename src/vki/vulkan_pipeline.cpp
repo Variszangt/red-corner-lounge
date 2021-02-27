@@ -189,6 +189,10 @@ PipelineWrapper create_world_pipeline(
     /*------------------------------------------------------------------*/
     // Return:
 
+    // TODO:
+    // 0. Debugging, naming global macro?
+    // 1. Pipeline cache
+    
     return PipelineWrapper {
         .pipeline               = std::move(pipeline),
         .descriptor_set_layout  = std::move(descriptor_set_layout),

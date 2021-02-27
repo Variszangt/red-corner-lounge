@@ -117,6 +117,8 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
     /*------------------------------------------------------------------*/
     // Create instance:
 
-    return vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
+    auto instance = vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
+    return std::move(instance);
 }
 }

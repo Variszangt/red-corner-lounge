@@ -2,6 +2,7 @@
 
 #include <set>
 
+#include "vulkan_debug.h"
 #include "error.h"
 
 namespace vki
@@ -18,9 +19,9 @@ uint32_t DeviceWrapper::get_memory_type_index(const uint32_t index_filter, const
     THROW_ERROR("suitable memory type could not be found");
 }
 
-uint32_t get_queue_family_index(const vk::PhysicalDevice device, vk::QueueFlags required_flags)
+uint32_t get_queue_family_index(const vk::PhysicalDevice physical_device, vk::QueueFlags required_flags)
 {
-    const auto queue_family_properties = device.getQueueFamilyProperties();
+    const auto queue_family_properties = physical_device.getQueueFamilyProperties();
     const uint32_t queue_count = static_cast<uint32_t>(queue_family_properties.size());
 
     // Find dedicated compute queue:
@@ -236,6 +237,9 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
         .compute  = get_queue_family_index(physical_device, vk::QueueFlagBits::eCompute),
     };
 
+    if (!physical_device.getSurfaceSupportKHR(queue_family_indices.graphics, createinfo.surface))
+        THROW_ERROR("graphics queue does not support presentation to surface");
+
     /*------------------------------------------------------------------*/
     // Prepare queue createinfos:
 
@@ -267,6 +271,8 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
         .pEnabledFeatures           = &createinfo.required_features,
     };
     auto device = physical_device.createDeviceUnique(device_createinfo);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(device.get());
+    set_object_name(device.get(), device.get(), "Main Device");
 
     /*------------------------------------------------------------------*/
     // Get queue handles:

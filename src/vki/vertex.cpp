@@ -11,7 +11,7 @@ vk::VertexInputBindingDescription Vertex::get_binding_description()
     };
 }
 
-std::array<vk::VertexInputAttributeDescription, 3> Vertex::get_attribute_descriptions()
+std::vector<vk::VertexInputAttributeDescription> Vertex::get_attribute_descriptions()
 {
     return {
         vk::VertexInputAttributeDescription { // [0] -> position description

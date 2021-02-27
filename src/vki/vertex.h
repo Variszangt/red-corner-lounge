@@ -1,6 +1,6 @@
 #pragma once
 
-#include <array>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
 #include "glm.h"
@@ -17,7 +17,7 @@ struct Vertex
     glm::vec2 tex_coord;
 
     static vk::VertexInputBindingDescription get_binding_description();
-    static std::array<vk::VertexInputAttributeDescription, 3> get_attribute_descriptions();
+    static std::vector<vk::VertexInputAttributeDescription> get_attribute_descriptions();
 
     bool operator==(const Vertex& other) const;
 };

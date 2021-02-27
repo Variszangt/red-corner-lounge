@@ -2,6 +2,7 @@
 
 #include "utility.h"
 #include "vulkan_assist.h"
+#include "vulkan_debug.h"
 
 namespace vki
 {
@@ -96,6 +97,7 @@ SwapchainWrapper create_swapchain(
         .oldSwapchain           = old_swapchain,
     };
     auto swapchain = device.createSwapchainKHRUnique(createinfo);
+    set_object_name(device, swapchain.get(), "Swapchain");
 
     /*------------------------------------------------------------------*/
     // Retrieve images:
