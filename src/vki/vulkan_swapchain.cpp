@@ -97,9 +97,8 @@ SwapchainWrapper create_swapchain(
         .oldSwapchain           = old_swapchain,
     };
     auto swapchain = device.createSwapchainKHRUnique(createinfo);
-    if (device_wrapper.debug_utils)
-        set_object_name(device, swapchain.get(), "PrimarySwapchain");
-        
+    set_object_name(device_wrapper, swapchain.get(), "MainSwapchain");
+
     /*------------------------------------------------------------------*/
     // Retrieve images:
 
@@ -118,6 +117,15 @@ SwapchainWrapper create_swapchain(
         image_views.push_back(device.createImageViewUnique(view_createinfo));
     }
 
+    for (int i = 0; i != images.size(); ++i)
+    {
+        auto image      = images[i];
+        auto image_view = image_views[i].get();
+
+        set_object_name(device_wrapper, image, fmt::format("SwapChainImage_{}", i));
+        set_object_name(device_wrapper, image_view, fmt::format("SwapChainImageView_{}", i));
+    }
+    
     /*------------------------------------------------------------------*/
     // Return:
 

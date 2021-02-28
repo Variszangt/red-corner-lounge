@@ -39,8 +39,8 @@ struct DeviceWrapper
         vk::UniqueCommandPool compute;
     } command_pools;
 
-    bool debug_utils;
-
+    bool debug_utils = false;
+    
     vk::Device get() const { return device.get(); }
 
     // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (filter is a bitmask, where each i-th bit of the filter specifies a memory type index).

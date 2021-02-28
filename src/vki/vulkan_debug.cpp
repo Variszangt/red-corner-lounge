@@ -4,8 +4,6 @@
 
 namespace vki
 {
-bool DEBUG_UTILS_ENABLED = false;
-
 // Callback function for Vulkan debug messenger. Logs the Vulkan message as a trace/warning/error according to its severity.
 VKAPI_ATTR VkBool32 VKAPI_CALL log_vulkan_validation_message(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -20,10 +18,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL log_vulkan_validation_message(
         LOG_TRACE(callback_data->pMessage);
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        LOG_WARNING(callback_data->pMessage);
+        LOG_WARNING_WITHOUT_SOURCE_LOCATION(callback_data->pMessage);
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-        LOG_ERROR(callback_data->pMessage);
+        LOG_ERROR_WITHOUT_SOURCE_LOCATION(callback_data->pMessage);
         break;
     default:
         LOG_ERROR("uknown switch case: {}", message_severity);

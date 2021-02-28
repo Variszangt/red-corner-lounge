@@ -13,6 +13,7 @@ struct PipelineWrapper
     vk::UniqueDescriptorSetLayout   descriptor_set_layout;
     vk::UniqueRenderPass            renderpass;
 };
+
 PipelineWrapper create_world_pipeline(
     const DeviceWrapper&    device_wrapper,
     const vk::Format        color_format,

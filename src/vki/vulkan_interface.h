@@ -31,7 +31,7 @@ class Vulkan
 {
 public:
     void init(const VulkanInitInfo& init_info);
-    void create_swapchain(const size_t width, const size_t height);
+    void on_resize(const size_t width, const size_t height);
 
 private:
     vk::UniqueInstance                  instance;

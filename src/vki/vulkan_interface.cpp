@@ -2,8 +2,11 @@
 
 #include "vulkan_debug.h"
 
+#include "vulkan_debug.h"
 #include "vulkan_instance.h"
 #include "vulkan_renderpass.h"
+
+using namespace vki;
 
 /*------------------------------------------------------------------*/
 // Default dispatcher:
@@ -42,20 +45,20 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     for (auto cstr : vkfw::getRequiredInstanceExtensions())
         required_instance_extensions.emplace_back(cstr);
 
-    const vki::InstanceCreateInfo instance_createinfo {
+    const InstanceCreateInfo instance_createinfo {
         .application_name       = init_info.application_name,
         .application_version    = application_version,
         .required_extensions    = required_instance_extensions,
         .debug                  = init_info.config.vulkan_debug,
     };
-    instance = vki::create_instance(instance_createinfo);
+    instance = create_instance(instance_createinfo);
 
     /*------------------------------------------------------------------*/
     // Create debug messenger:
 
     if (init_info.config.vulkan_debug >= VulkanDebug::On)
     {
-        const auto debug_messenger_createinfo = vki::generate_debug_messenger_createinfo(init_info.config.vulkan_debug);
+        const auto debug_messenger_createinfo = generate_debug_messenger_createinfo(init_info.config.vulkan_debug);
         debug_messenger = instance.get().createDebugUtilsMessengerEXTUnique(debug_messenger_createinfo);
     }
 
@@ -63,7 +66,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     // Create surface:
 
     surface = vkfw::createWindowSurfaceUnique(instance.get(), init_info.window);
-
+    
     /*------------------------------------------------------------------*/
     // Create device:
 
@@ -75,37 +78,38 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         .sampleRateShading = VK_TRUE,
         .samplerAnisotropy = VK_TRUE,
     };
-    const vki::DeviceCreateInfo device_createinfo {
+    const DeviceCreateInfo device_createinfo {
         .instance            = instance.get(),
         .surface             = surface.get(),
         .required_extensions = required_device_extensions,
         .required_features   = required_device_features,
         .debug_utils         = init_info.config.vulkan_debug >= VulkanDebug::On,
     };
-    device_wrapper = vki::create_device(device_createinfo);
+    device_wrapper = create_device(device_createinfo);
+    set_object_name(device_wrapper, device_wrapper.get(), "MainDevice");
     
     /*------------------------------------------------------------------*/
     // Create swapchain:
 
     auto [width, height] = init_info.window.getSize();
-    create_swapchain(width, height);
+    on_resize(width, height);
 
     /*------------------------------------------------------------------*/
     // Pipelines:
 
-    world_pipeline = vki::create_world_pipeline(
+    world_pipeline = create_world_pipeline(
         device_wrapper,
         swapchain_wrapper.format,
         vk::Format::eD32Sfloat,
         swapchain_wrapper.extent);
 }
 
-void Vulkan::create_swapchain(const size_t width, const size_t height)
+void Vulkan::on_resize(const size_t width, const size_t height)
 {
     assert(device_wrapper.get());
     assert(surface.get());
 
-    swapchain_wrapper = vki::create_swapchain(
+    swapchain_wrapper = create_swapchain(
         device_wrapper,
         surface.get(),
         vk::Extent2D { static_cast<uint32_t>(width), static_cast<uint32_t>(height) },

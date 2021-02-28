@@ -1,5 +1,6 @@
 #include "vulkan_pipeline.h"
 
+#include "vulkan_debug.h"
 #include "vulkan_assist.h"
 #include "vulkan_renderpass.h"
 
@@ -42,7 +43,7 @@ PipelineWrapper create_world_pipeline(
 
     auto vert_shader_module = create_shader_module(device_wrapper, "assets/shaders/triangle.vert.spv");
     auto frag_shader_module = create_shader_module(device_wrapper, "assets/shaders/triangle.frag.spv");
-
+    
     const vk::PipelineShaderStageCreateInfo vert_shader_createinfo {
         .stage  = vk::ShaderStageFlagBits::eVertex,
         .module = vert_shader_module.get(),
@@ -190,8 +191,8 @@ PipelineWrapper create_world_pipeline(
     // Return:
 
     // TODO:
-    // 0. Some error?
     // 1. Pipeline cache
+    // 2. Create a triangle again!
     
     return PipelineWrapper {
         .pipeline               = std::move(pipeline),

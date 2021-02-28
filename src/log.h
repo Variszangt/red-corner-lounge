@@ -11,6 +11,9 @@
 #define LOG_WARNING     SPDLOG_WARN
 #define LOG_ERROR       SPDLOG_ERROR
 
+#define LOG_WARNING_WITHOUT_SOURCE_LOCATION spdlog::warn
+#define LOG_ERROR_WITHOUT_SOURCE_LOCATION spdlog::error
+
 /*------------------------------------------------------------------*/
 // Logger initialization:
 
