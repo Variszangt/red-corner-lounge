@@ -23,6 +23,7 @@ class SingleTimeCommandBuffer
 {
 public:
     SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue); // Allocates a new command buffer on the specified command pool and begins recording. Queued (->) commands will be submitted to the specified queue upon calling submit().
+    
     void submit(); // Blocks until finished.
 
     vk::CommandBuffer* operator->() { return &cmdbuf.get(); }

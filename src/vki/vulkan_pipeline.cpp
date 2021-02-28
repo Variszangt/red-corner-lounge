@@ -190,7 +190,7 @@ PipelineWrapper create_world_pipeline(
     // Return:
 
     // TODO:
-    // 0. Debugging, naming global macro?
+    // 0. Some error?
     // 1. Pipeline cache
     
     return PipelineWrapper {

@@ -17,7 +17,7 @@ struct DeviceWrapper
     vk::PhysicalDeviceFeatures          enabled_features;
     vk::PhysicalDeviceProperties        properties;
     vk::PhysicalDeviceMemoryProperties  memory_properties;
-    
+
     struct QueueFamilyIndices
     {
         uint32_t graphics   = 0u;
@@ -39,6 +39,8 @@ struct DeviceWrapper
         vk::UniqueCommandPool compute;
     } command_pools;
 
+    bool debug_utils;
+
     vk::Device get() const { return device.get(); }
 
     // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (filter is a bitmask, where each i-th bit of the filter specifies a memory type index).
@@ -51,7 +53,7 @@ struct DeviceCreateInfo
     vk::SurfaceKHR              surface;
     std::vector<const char*>    required_extensions;
     vk::PhysicalDeviceFeatures  required_features;
-    VulkanDebug                 debug; // If debug is enabled, additional messages will be logged during the device selection process.
+    bool                        debug_utils;
 };
 DeviceWrapper create_device(const DeviceCreateInfo& createinfo);
 }    

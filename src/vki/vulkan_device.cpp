@@ -62,8 +62,7 @@ uint32_t get_queue_family_index(const vk::PhysicalDevice physical_device, vk::Qu
 #define CHECK_FEATURE_SUPPORT(feature)                                                          \
     if (createinfo.required_features.feature && !available_features.feature)                    \
     {                                                                                           \
-        if (createinfo.debug >= VulkanDebug::On)                                                \
-            LOG_WARNING("gpu does not support {}", #feature);                                   \
+        LOG_WARNING("gpu does not support {}", #feature);                                       \
         return false;                                                                           \
     }
 
@@ -100,8 +99,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
             }
             if (!extension_found)
             {
-                if (createinfo.debug >= VulkanDebug::On)
-                    LOG_WARNING("gpu does not support the following extension: {}", required_extension);
+                LOG_WARNING("gpu does not support the following extension: {}", required_extension);
                 return false;
             }
         }
@@ -185,21 +183,18 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
 
         const auto device_properties = device.getProperties();
 
-        if (createinfo.debug >= VulkanDebug::On)
-            LOG_INFO("rating gpu: {}", device_properties.deviceName);
+        LOG_INFO("rating gpu: {}", device_properties.deviceName);
 
         if (!supports_all_required_extensions(device))
         {
             supports_minimal_requirements = false;
-            if (createinfo.debug >= VulkanDebug::On)
-                LOG_WARNING("gpu does not support all required extensions");
+            LOG_WARNING("gpu does not support all required extensions");
         }
 
         if (!supports_all_required_features(device))
         {
             supports_minimal_requirements = false;
-            if (createinfo.debug >= VulkanDebug::On)
-                LOG_WARNING("gpu does not support all required features");
+            LOG_WARNING("gpu does not support all required features");
         }
 
         if (supports_minimal_requirements)
@@ -272,7 +267,6 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
     };
     auto device = physical_device.createDeviceUnique(device_createinfo);
     VULKAN_HPP_DEFAULT_DISPATCHER.init(device.get());
-    set_object_name(device.get(), device.get(), "Main Device");
 
     /*------------------------------------------------------------------*/
     // Get queue handles:
@@ -309,6 +303,7 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
         .queue_family_indices   = std::move(queue_family_indices),
         .queues                 = std::move(queues),
         .command_pools          = std::move(command_pools),
+        .debug_utils            = createinfo.debug_utils,
     };
 };
 }

@@ -4,6 +4,8 @@
 
 namespace vki
 {
+bool DEBUG_UTILS_ENABLED = false;
+
 // Callback function for Vulkan debug messenger. Logs the Vulkan message as a trace/warning/error according to its severity.
 VKAPI_ATTR VkBool32 VKAPI_CALL log_vulkan_validation_message(
     VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,

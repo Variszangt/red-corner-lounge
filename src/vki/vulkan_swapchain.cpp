@@ -97,8 +97,9 @@ SwapchainWrapper create_swapchain(
         .oldSwapchain           = old_swapchain,
     };
     auto swapchain = device.createSwapchainKHRUnique(createinfo);
-    set_object_name(device, swapchain.get(), "Swapchain");
-
+    if (device_wrapper.debug_utils)
+        set_object_name(device, swapchain.get(), "PrimarySwapchain");
+        
     /*------------------------------------------------------------------*/
     // Retrieve images:
 

@@ -8,6 +8,7 @@
 #include "config.h"
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
+#include "vulkan_pipeline.h"
 
 /*------------------------------------------------------------------*/
 // All Vulkan-related code shall be written in the vki ("vulkan interface") subfolder/namespace. This header, in turn, serves as the interface to any such code - it is the only Vulkan header that application code should ever include.
@@ -39,4 +40,6 @@ private:
 
     vki::DeviceWrapper      device_wrapper;
     vki::SwapchainWrapper   swapchain_wrapper;
+
+    vki::PipelineWrapper world_pipeline;
 };

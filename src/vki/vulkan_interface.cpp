@@ -80,7 +80,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         .surface             = surface.get(),
         .required_extensions = required_device_extensions,
         .required_features   = required_device_features,
-        .debug               = init_info.config.vulkan_debug,
+        .debug_utils         = init_info.config.vulkan_debug >= VulkanDebug::On,
     };
     device_wrapper = vki::create_device(device_createinfo);
     
@@ -91,15 +91,13 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     create_swapchain(width, height);
 
     /*------------------------------------------------------------------*/
-    // Renderpass:
+    // Pipelines:
 
-    // auto renderpass = vki::create_renderpass(
-    //     device_wrapper,
-    //     swapchain_wrapper.format,
-    //     vk::Format::eR8G8Srgb,
-    //     vki::RenderPassType::ColorAndDepthStencil
-    // );
-    // renderpass.reset();
+    world_pipeline = vki::create_world_pipeline(
+        device_wrapper,
+        swapchain_wrapper.format,
+        vk::Format::eD32Sfloat,
+        swapchain_wrapper.extent);
 }
 
 void Vulkan::create_swapchain(const size_t width, const size_t height)

@@ -65,6 +65,9 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
         !contains(required_extensions, DEBUG_UTILS_EXTENSION_NAME))
         required_extensions.emplace_back(DEBUG_UTILS_EXTENSION_NAME);
 
+    if (createinfo.debug >= VulkanDebug::On)
+        DEBUG_UTILS_ENABLED = true;
+    
     const auto required_extensions_data = required_extensions.data();
     const uint32_t required_extension_count = static_cast<uint32_t>(required_extensions.size());
 
@@ -102,7 +105,7 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
     // Debug messenger createinfo:
 
     const auto debug_messenger_createinfo = generate_debug_messenger_createinfo(createinfo.debug);
-
+    
     /*------------------------------------------------------------------*/
     // Extended createinfo (pNext chain):
 

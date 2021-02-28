@@ -6,6 +6,8 @@
 
 namespace vki
 {
+extern bool DEBUG_UTILS_ENABLED; // Disabled by default; enabled by Instance if it uses the DebugUtils extension. 
+
 /*------------------------------------------------------------------*/
 // DebugMessenger:
 
@@ -14,6 +16,7 @@ vk::DebugUtilsMessengerCreateInfoEXT generate_debug_messenger_createinfo(const V
 
 /*------------------------------------------------------------------*/
 // Object naming:
+
 
 // For any Vulkan object that will be named/tagged by DebugUtils, it must have its handle-type mapped to a corresponding vk::ObjectType by using the following MAP_VULKAN_OBJECT_TYPE macro.
 template<typename H>
@@ -39,6 +42,8 @@ void set_object_name(
     const VkHppHandle   object_handle,
     const char*         object_name)
 {
+    assert(DEBUG_UTILS_ENABLED);
+    
     const auto object_type = VulkanObjectTypeMap<VkHppHandle>::value;
     assert(object_type != vk::ObjectType::eUnknown);
 
