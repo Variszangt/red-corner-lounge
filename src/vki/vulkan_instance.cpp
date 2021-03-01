@@ -3,12 +3,14 @@
 #include "utility.h"
 #include "error.h"
 #include "vulkan_debug.h"
+#include "vulkan_assist.h"
 
 namespace vki
 {
 /*------------------------------------------------------------------*/
 // Constants:
 
+extern const uint32_t MIN_VULKAN_API_VERSION = VK_API_VERSION_1_2;
 const char* DEBUG_UTILS_EXTENSION_NAME = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
 /*------------------------------------------------------------------*/
@@ -23,8 +25,16 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
         .applicationVersion = createinfo.application_version,
         .pEngineName        = "myEngine",
         .engineVersion      = VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion         = VK_API_VERSION_1_2,
+        .apiVersion         = MIN_VULKAN_API_VERSION,
     };
+
+    auto instance_version = vk::enumerateInstanceVersion();
+    LOG_INFO("expecting minimum API version: {}", get_version_string(MIN_VULKAN_API_VERSION));
+    LOG_INFO("vulkan header version: {}", get_version_string(VK_HEADER_VERSION_COMPLETE));
+    LOG_INFO("vulkan instance version: {}", get_version_string(instance_version));
+    if (instance_version < MIN_VULKAN_API_VERSION)
+        THROW_ERROR("minimum vulkan instance version ({}) not installed; check your vulkan runtimes",
+        get_version_string(MIN_VULKAN_API_VERSION));
 
     /*------------------------------------------------------------------*/
     // Layers:
@@ -117,6 +127,7 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
 
     auto instance = vk::createInstanceUnique(extended_createinfo.get<vk::InstanceCreateInfo>());
     VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
+
     return std::move(instance);
 }
 }

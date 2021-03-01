@@ -20,8 +20,8 @@ void init_default_dispatcher()
     auto vkGetInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
 
-    // 2. VULKAN_HPP_DEFAULT_DISPATCHER.init(instance); called in vulkan_instance.cpp
-    // 3. VULKAN_HPP_DEFAULT_DISPATCHER.init(device); called in vulkan_device.cpp
+    // 2. VULKAN_HPP_DEFAULT_DISPATCHER.init(instance) called in vulkan_instance.cpp
+    // 3. VULKAN_HPP_DEFAULT_DISPATCHER.init(device) called in vulkan_device.cpp
 }
 
 /*------------------------------------------------------------------*/

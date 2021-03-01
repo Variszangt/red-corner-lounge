@@ -2,11 +2,14 @@
 
 #include <set>
 
+#include "vulkan_assist.h"
 #include "vulkan_debug.h"
 #include "error.h"
 
 namespace vki
 {
+extern const uint32_t MIN_VULKAN_API_VERSION;
+
 uint32_t DeviceWrapper::get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties) const
 {
     for (uint32_t i = 0; i != memory_properties.memoryTypeCount; ++i)
@@ -62,7 +65,7 @@ uint32_t get_queue_family_index(const vk::PhysicalDevice physical_device, vk::Qu
 #define CHECK_FEATURE_SUPPORT(feature)                                                          \
     if (createinfo.required_features.feature && !available_features.feature)                    \
     {                                                                                           \
-        LOG_WARNING("gpu does not support {}", #feature);                                       \
+        LOG_WARNING("device does not support {}", #feature);                                       \
         return false;                                                                           \
     }
 
@@ -77,7 +80,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     const auto physical_devices = createinfo.instance.enumeratePhysicalDevices();
 
     if (physical_devices.empty())
-        THROW_ERROR("gpu with vulkan support could not be found");
+        THROW_ERROR("device with vulkan support could not be found");
 
     /*------------------------------------------------------------------*/
     // Check availability of required extensions:
@@ -85,9 +88,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     auto supports_all_required_extensions = [&](const vk::PhysicalDevice device)
     {
         const auto available_extensions = device.enumerateDeviceExtensionProperties();
-        for (auto x : available_extensions)
-            LOG_INFO(x.extensionName);
-        
+
         for (const char* required_extension : createinfo.required_extensions)
         {
             bool extension_found = false;
@@ -101,7 +102,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
             }
             if (!extension_found)
             {
-                LOG_WARNING("gpu does not support the following extension: {}", required_extension);
+                LOG_WARNING("device does not support the following extension: {}", required_extension);
                 return false;
             }
         }
@@ -185,18 +186,29 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
 
         const auto device_properties = device.getProperties();
 
-        LOG_INFO("rating gpu: {}", device_properties.deviceName);
+        LOG_INFO(
+            "rating device: {} (driver: {}) (API: {})",
+            device_properties.deviceName,
+            get_version_string(device_properties.driverVersion),
+            get_version_string(device_properties.apiVersion)
+        );
+
+        if (device_properties.apiVersion < MIN_VULKAN_API_VERSION)
+        {
+            supports_minimal_requirements = false;
+            LOG_WARNING("device does not support minimum API version ({})", get_version_string(MIN_VULKAN_API_VERSION));
+        }
 
         if (!supports_all_required_extensions(device))
         {
             supports_minimal_requirements = false;
-            LOG_WARNING("gpu does not support all required extensions");
+            LOG_WARNING("device does not support all required extensions");
         }
 
         if (!supports_all_required_features(device))
         {
             supports_minimal_requirements = false;
-            LOG_WARNING("gpu does not support all required features");
+            LOG_WARNING("device does not support all required features");
         }
 
         if (supports_minimal_requirements)
@@ -204,13 +216,13 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     }
 
     if (device_ratings.empty())
-        THROW_ERROR("gpu with minimal requirements could not be found");
+        THROW_ERROR("device with minimal requirements could not be found");
 
     /*------------------------------------------------------------------*/
     // Pick the optimal:
 
     const auto optimal_device = device_ratings.rbegin()->second; // Last element, highest rating.
-    LOG_INFO("picked gpu: {}", optimal_device.getProperties().deviceName);
+    LOG_INFO("picked device: {}", optimal_device.getProperties().deviceName);
     return optimal_device;
 }
 

@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <fmt/format.h>
 #include "vulkan_device.h"
 
 /*------------------------------------------------------------------*/
@@ -9,6 +10,12 @@
 
 namespace vki
 {
+/*------------------------------------------------------------------*/
+// Various:
+
+// Returns a "major.minor.patch" string by converting a vulkan-style version code.
+std::string get_version_string(const uint32_t version);
+
 /*------------------------------------------------------------------*/
 // Sync:
 

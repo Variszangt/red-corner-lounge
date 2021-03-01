@@ -6,6 +6,15 @@
 
 namespace vki
 {
+std::string get_version_string(const uint32_t version)
+{
+    return fmt::format("{}.{}.{}",
+        VK_VERSION_MAJOR(version),
+        VK_VERSION_MINOR(version),
+        VK_VERSION_PATCH(version)
+    );
+}
+
 vk::UniqueFence create_fence(const vk::Device device)
 {
     vk::FenceCreateInfo createinfo {
