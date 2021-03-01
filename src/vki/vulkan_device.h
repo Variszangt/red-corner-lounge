@@ -39,7 +39,7 @@ struct DeviceWrapper
         vk::UniqueCommandPool compute;
     } command_pools;
 
-    bool debug_utils = false;
+    bool debug_utils = false; 
     
     vk::Device get() const { return device.get(); }
 

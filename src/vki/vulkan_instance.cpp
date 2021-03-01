@@ -64,14 +64,12 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
     if (createinfo.debug >= VulkanDebug::On &&
         !contains(required_extensions, DEBUG_UTILS_EXTENSION_NAME))
         required_extensions.emplace_back(DEBUG_UTILS_EXTENSION_NAME);
-    
-    const auto required_extensions_data = required_extensions.data();
     const uint32_t required_extension_count = static_cast<uint32_t>(required_extensions.size());
 
     // Verify availability of required extensions:
     if (required_extension_count)
     {
-        for (const auto& required_extension_name : createinfo.required_extensions)
+        for (const auto& required_extension_name : required_extensions)
         {
             bool extension_found = false;
             for (const auto& available_extension : available_extensions)
@@ -95,7 +93,7 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
         .enabledLayerCount       = required_layer_count,
         .ppEnabledLayerNames     = required_layers.data(),
         .enabledExtensionCount   = required_extension_count,
-        .ppEnabledExtensionNames = required_extensions_data,
+        .ppEnabledExtensionNames = required_extensions.data(),
     };
 
     /*------------------------------------------------------------------*/

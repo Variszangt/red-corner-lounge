@@ -20,8 +20,8 @@ void init_default_dispatcher()
     auto vkGetInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
 
-    // 2. Default dispatcher must be initialized with an instance as soon as one is created! (vulkan_instance.cpp)
-    // 3. Default dispatcher must be initialized with a device as soon as one is created! (vulkan_device.cpp)
+    // 2. VULKAN_HPP_DEFAULT_DISPATCHER.init(instance); called in vulkan_instance.cpp
+    // 3. VULKAN_HPP_DEFAULT_DISPATCHER.init(device); called in vulkan_device.cpp
 }
 
 /*------------------------------------------------------------------*/
@@ -87,7 +87,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
     };
     device_wrapper = create_device(device_createinfo);
     set_object_name(device_wrapper, device_wrapper.get(), "MainDevice");
-    
+
     /*------------------------------------------------------------------*/
     // Create swapchain:
 
