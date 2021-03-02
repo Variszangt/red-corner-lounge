@@ -195,7 +195,6 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
 
         if (device_properties.apiVersion < MIN_VULKAN_API_VERSION)
         {
-            supports_minimal_requirements = false;
             LOG_WARNING("device does not support minimum API version ({})", get_version_string(MIN_VULKAN_API_VERSION));
         }
 
