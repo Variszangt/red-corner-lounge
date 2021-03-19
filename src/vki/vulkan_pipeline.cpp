@@ -190,10 +190,6 @@ PipelineWrapper create_world_pipeline(
     /*------------------------------------------------------------------*/
     // Return:
 
-    // TODO:
-    // 1. Pipeline cache
-    // 2. Create a triangle again!
-    
     return PipelineWrapper {
         .pipeline               = std::move(pipeline),
         .descriptor_set_layout  = std::move(descriptor_set_layout),

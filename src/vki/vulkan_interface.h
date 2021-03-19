@@ -14,9 +14,9 @@
 // All Vulkan-related code shall be written in the vki ("vulkan interface") subfolder/namespace. This header, in turn, serves as the interface to any such code - it is the only Vulkan header that application code should ever include.
 
 /*------------------------------------------------------------------*/
-// VulkanInitInfo:
+// VulkanRendererInitInfo:
 
-struct VulkanInitInfo
+struct VulkanRendererInitInfo
 {
     const Config&                   config;
     const std::string               application_name;
@@ -27,10 +27,10 @@ struct VulkanInitInfo
 /*------------------------------------------------------------------*/
 // Vulkan:
 
-class Vulkan
+class VulkanRenderer
 {
 public:
-    void init(const VulkanInitInfo& init_info);
+    void init(const VulkanRendererInitInfo& init_info);
     void on_resize(const size_t width, const size_t height);
 
 private:

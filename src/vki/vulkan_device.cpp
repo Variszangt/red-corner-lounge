@@ -88,7 +88,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     auto supports_all_required_extensions = [&](const vk::PhysicalDevice device)
     {
         const auto available_extensions = device.enumerateDeviceExtensionProperties();
-
+        
         for (const char* required_extension : createinfo.required_extensions)
         {
             bool extension_found = false;

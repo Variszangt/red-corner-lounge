@@ -69,7 +69,7 @@ vk::UniqueInstance create_instance(const InstanceCreateInfo& createinfo)
     // Extensions:
 
     const auto available_extensions = vk::enumerateInstanceExtensionProperties();
-
+    
     auto required_extensions = createinfo.required_extensions;
     if (createinfo.debug >= VulkanDebug::On &&
         !contains(required_extensions, DEBUG_UTILS_EXTENSION_NAME))

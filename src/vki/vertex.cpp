@@ -25,12 +25,6 @@ std::vector<vk::VertexInputAttributeDescription> Vertex::get_attribute_descripti
             .binding    = 0,
             .format     = vk::Format::eR32G32B32Sfloat,
             .offset     = offsetof(Vertex, color)
-        },
-        vk::VertexInputAttributeDescription { // [2] -> texture coordinate
-            .location   = 2,
-            .binding    = 0,
-            .format     = vk::Format::eR32G32Sfloat,
-            .offset     = offsetof(Vertex, tex_coord)
         }
     };
 }

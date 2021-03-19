@@ -26,5 +26,5 @@ private:
     Config config;
     vkfw::UniqueInstance glfw_instance;
     vkfw::UniqueWindow window;
-    Vulkan vulkan;
+    VulkanRenderer vulkan_renderer;
 };

@@ -29,7 +29,7 @@ vk::UniqueFence create_fence(const vk::Device device);
 class SingleTimeCommandBuffer
 {
 public:
-    SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue); // Allocates a new command buffer on the specified command pool and begins recording. Queued (->) commands will be submitted to the specified queue upon calling submit().
+    SingleTimeCommandBuffer(const vk::Device device, const vk::CommandPool command_pool, const vk::Queue queue); // Allocates a new command buffer on the specified command pool and begins recording. Queue commands using ->.
     
     void submit(); // Blocks until finished.
 

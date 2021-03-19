@@ -26,7 +26,7 @@ void init_default_dispatcher()
 
 /*------------------------------------------------------------------*/
 
-void Vulkan::init(const VulkanInitInfo& init_info)
+void VulkanRenderer::init(const VulkanRendererInitInfo& init_info)
 {
     init_default_dispatcher();
 
@@ -104,7 +104,7 @@ void Vulkan::init(const VulkanInitInfo& init_info)
         swapchain_wrapper.extent);
 }
 
-void Vulkan::on_resize(const size_t width, const size_t height)
+void VulkanRenderer::on_resize(const size_t width, const size_t height)
 {
     assert(device_wrapper.get());
     assert(surface.get());

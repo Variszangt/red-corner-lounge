@@ -28,13 +28,13 @@ int App::run()
 
         create_window();
 
-        const VulkanInitInfo vulkan_init_info {
+        const VulkanRendererInitInfo vulkan_renderer_init_info {
             .config                 = config,
             .application_name       = TITLE,
             .application_version    = VERSION,
             .window                 = window.get()
         };
-        vulkan.init(vulkan_init_info);
+        vulkan_renderer.init(vulkan_renderer_init_info);
     }
     catch (const std::exception& e)
     {
