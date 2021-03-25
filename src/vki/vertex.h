@@ -14,7 +14,6 @@ struct Vertex
 {
     glm::vec3 position;
     glm::vec3 color;
-    glm::vec2 tex_coord;
 
     static vk::VertexInputBindingDescription get_binding_description();
     static std::vector<vk::VertexInputAttributeDescription> get_attribute_descriptions();
@@ -31,8 +30,7 @@ template<> struct hash<::vki::Vertex>
     size_t operator()(const ::vki::Vertex& vertex) const
     {
         return ((hash<glm::vec3>()(vertex.position) ^
-            (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-            (hash<glm::vec2>()(vertex.tex_coord) << 1);
+            (hash<glm::vec3>()(vertex.color) << 1)) >> 1);
     }
 };
 }

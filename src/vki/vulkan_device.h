@@ -45,6 +45,11 @@ struct DeviceWrapper
 
     // Returns the index of a memoryType which has all required memory properties. Additionally, only memoryTypes with indices allowed by the filter are returned (filter is a bitmask, where each i-th bit of the filter specifies a memory type index).
     uint32_t get_memory_type_index(const uint32_t index_filter, const vk::MemoryPropertyFlags required_properties) const;
+
+    vk::Format get_first_supported_format(
+        const std::vector<vk::Format>&  formats,
+        const vk::ImageTiling           tiling,
+        const vk::FormatFeatureFlagBits features) const;
 };
 
 struct DeviceCreateInfo

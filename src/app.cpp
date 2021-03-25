@@ -95,13 +95,28 @@ void App::create_window()
     };
 }
 
+using Clock = std::conditional<
+    std::chrono::high_resolution_clock::is_steady,
+    std::chrono::high_resolution_clock,
+    std::chrono::steady_clock >::type;
+using Time = std::chrono::duration<float, std::deca>;
+
 void App::main_loop()
 {
+    Clock clock;
+    Time previous = clock.now().time_since_epoch();
+    
     while (!window->shouldClose())
     {
         vkfw::pollEvents();
         if (window->getKey(vkfw::Key::eEscape))
             window->setShouldClose(true);
+
+        Time current = clock.now().time_since_epoch();
+        const float elapsed_time = (current - previous).count();
+        previous = current;
+
+        vulkan_renderer.update(elapsed_time);
     };
 }
 

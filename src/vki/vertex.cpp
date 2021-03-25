@@ -31,7 +31,7 @@ std::vector<vk::VertexInputAttributeDescription> Vertex::get_attribute_descripti
 
 bool Vertex::operator==(const Vertex& other) const
 {
-    return position == other.position && color == other.color && tex_coord == other.tex_coord;
+    return position == other.position && color == other.color;
 }
 
 }

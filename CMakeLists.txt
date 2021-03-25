@@ -14,6 +14,8 @@ add_executable(${TARGET_NAME}
     src/app.h
     src/app.cpp
   
+    src/vki/camera.h
+    src/vki/camera.cpp
     src/vki/vertex.h
     src/vki/vertex.cpp
     src/vki/vulkan_assist.h

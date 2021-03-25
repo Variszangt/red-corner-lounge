@@ -22,6 +22,29 @@ uint32_t DeviceWrapper::get_memory_type_index(const uint32_t index_filter, const
     THROW_ERROR("suitable memory type could not be found");
 }
 
+vk::Format DeviceWrapper::get_first_supported_format(
+    const std::vector<vk::Format>&  formats,
+    const vk::ImageTiling           tiling,
+    const vk::FormatFeatureFlagBits features) const
+{
+    assert(physical_device);
+
+    for (auto format : formats)
+    {
+        const auto format_properties = physical_device.getFormatProperties(format);
+
+        if (tiling == vk::ImageTiling::eLinear &&
+            (format_properties.linearTilingFeatures & features) == features)
+            return format;
+        
+        if (tiling == vk::ImageTiling::eOptimal &&
+            (format_properties.optimalTilingFeatures & features) == features)
+            return format;
+    }
+
+    THROW_ERROR("required format not supported");
+}
+
 uint32_t get_queue_family_index(const vk::PhysicalDevice physical_device, vk::QueueFlags required_flags)
 {
     const auto queue_family_properties = physical_device.getQueueFamilyProperties();
@@ -69,7 +92,7 @@ uint32_t get_queue_family_index(const vk::PhysicalDevice physical_device, vk::Qu
         return false;                                                                           \
     }
 
-vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
+vk::PhysicalDevice get_optimal_physical_device(const DeviceCreateInfo& createinfo)
 {
     assert(createinfo.instance);
     assert(createinfo.surface);
@@ -88,7 +111,7 @@ vk::PhysicalDevice pick_physical_device(const DeviceCreateInfo& createinfo)
     auto supports_all_required_extensions = [&](const vk::PhysicalDevice device)
     {
         const auto available_extensions = device.enumerateDeviceExtensionProperties();
-        
+
         for (const char* required_extension : createinfo.required_extensions)
         {
             bool extension_found = false;
@@ -230,7 +253,7 @@ DeviceWrapper create_device(const DeviceCreateInfo& createinfo)
     /*------------------------------------------------------------------*/
     // Pick physical device:
 
-    auto physical_device = pick_physical_device(createinfo);
+    auto physical_device = get_optimal_physical_device(createinfo);
 
     auto enabled_features  = createinfo.required_features;
     auto properties        = physical_device.getProperties();

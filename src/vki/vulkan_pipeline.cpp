@@ -41,8 +41,8 @@ PipelineWrapper create_world_pipeline(
     /*------------------------------------------------------------------*/
     // Shader stages:
 
-    auto vert_shader_module = create_shader_module(device_wrapper, "assets/shaders/triangle.vert.spv");
-    auto frag_shader_module = create_shader_module(device_wrapper, "assets/shaders/triangle.frag.spv");
+    auto vert_shader_module = create_shader_module(device_wrapper, "assets/shaders/world.vert.spv");
+    auto frag_shader_module = create_shader_module(device_wrapper, "assets/shaders/world.frag.spv");
     
     const vk::PipelineShaderStageCreateInfo vert_shader_createinfo {
         .stage  = vk::ShaderStageFlagBits::eVertex,
@@ -141,8 +141,18 @@ PipelineWrapper create_world_pipeline(
         .pAttachments       = &color_blend_attachment
     };
 
+    /*------------------------------------------------------------------*/
+
+    std::vector<vk::DynamicState> dynamic_states {
+        vk::DynamicState::eViewport,
+        vk::DynamicState::eScissor
+    };
+    
     // Dynamic states:
-    vk::PipelineDynamicStateCreateInfo* dynamic_state_createinfo = nullptr;
+    vk::PipelineDynamicStateCreateInfo dynamic_state_createinfo {
+        .dynamicStateCount  = static_cast<uint32_t>(dynamic_states.size()),
+        .pDynamicStates     = dynamic_states.data(),
+    };
 
     /*------------------------------------------------------------------*/
     // Pipeline layout:
@@ -177,13 +187,14 @@ PipelineWrapper create_world_pipeline(
         .pMultisampleState      = &multisampling_createinfo,
         .pDepthStencilState     = &depth_stencil_createinfo,
         .pColorBlendState       = &color_blend_createinfo,
-        .pDynamicState          = dynamic_state_createinfo,
+        .pDynamicState          = &dynamic_state_createinfo,
         .layout                 = pipeline_layout.get(),
         .renderPass             = renderpass.get(),
         .subpass                = 0,
     };
     auto [result, pipeline] = device.createGraphicsPipelineUnique(nullptr, createinfo);
-
+    set_object_name(device_wrapper, pipeline.get(), "WorldPipeline");
+    
     if (result == vk::Result::ePipelineCompileRequiredEXT)
         LOG_WARNING("compile required but not requested by application");
 

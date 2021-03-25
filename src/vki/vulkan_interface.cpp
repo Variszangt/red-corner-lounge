@@ -66,7 +66,7 @@ void VulkanRenderer::init(const VulkanRendererInitInfo& init_info)
     // Create surface:
 
     surface = vkfw::createWindowSurfaceUnique(instance.get(), init_info.window);
-    
+
     /*------------------------------------------------------------------*/
     // Create device:
 
@@ -97,10 +97,16 @@ void VulkanRenderer::init(const VulkanRendererInitInfo& init_info)
     /*------------------------------------------------------------------*/
     // Pipelines:
 
+    const vk::Format depth_stencil_format = device_wrapper.get_first_supported_format(
+        { vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint },
+        vk::ImageTiling::eOptimal,
+        vk::FormatFeatureFlagBits::eDepthStencilAttachment
+    );
+    
     world_pipeline = create_world_pipeline(
         device_wrapper,
         swapchain_wrapper.format,
-        vk::Format::eD32Sfloat,
+        depth_stencil_format,
         swapchain_wrapper.extent);
 }
 
@@ -115,4 +121,10 @@ void VulkanRenderer::on_resize(const size_t width, const size_t height)
         vk::Extent2D { static_cast<uint32_t>(width), static_cast<uint32_t>(height) },
         swapchain_wrapper.get()
     );
+}
+
+void VulkanRenderer::update(const float elapsed_time)
+{
+    
+    LOG_INFO("{}", elapsed_time);
 }
