@@ -8,8 +8,6 @@
 #include <Windows.h>
 #endif
 
-// Test push
-
 int main(int argc, char** argv)
 {
     /*------------------------------------------------------------------*/
